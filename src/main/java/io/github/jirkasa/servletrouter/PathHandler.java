@@ -26,7 +26,6 @@ class PathHandler<Request extends ServletRequest, Response extends ServletRespon
 	}
 	
 	public boolean matches(String[] requestPath) {
-		System.out.println("Path handler: " + (path != null ? String.join("/", path) : "[ALL]"));
 		// if handler should be used for every path
 		if (path == null) return true;
 		
