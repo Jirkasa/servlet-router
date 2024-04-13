@@ -16,7 +16,7 @@ class ControllerInvoker<Request extends ServletRequest, Response extends Servlet
 	
 	@Override
 	public boolean handle(Request request, Response response) throws Exception {
-		Controller<Request, Response> controller = controllerClass.getConstructor(ServletContext.class).newInstance(request.getServletContext());
+		Controller<Request, Response> controller = controllerClass.getConstructor().newInstance();
 		controller.setPathParams(pathParams);
 		return controller.handle(request, response);
 	}
