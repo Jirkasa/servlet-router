@@ -11,16 +11,10 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 
 public abstract class Router<Request extends ServletRequest, Response extends ServletResponse> implements Handler<Request, Response> {
-	protected final ServletContext servletContext;
-	
 	private List<PathHandler<Request, Response>> handlers = new LinkedList<PathHandler<Request, Response>>();
 	private Class<? extends ErrorController<Request, Response>> errorControllerClass = null;
 	
 	private Map<String, String> pathParams = null;
-	
-	public Router(ServletContext servletContext) {
-		this.servletContext = servletContext;
-	}
 	
 	@SafeVarargs
 	public final void register(String path, Handler<Request, Response>... handlers) {

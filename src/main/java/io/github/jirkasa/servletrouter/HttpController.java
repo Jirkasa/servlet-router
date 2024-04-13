@@ -20,10 +20,6 @@ public abstract class HttpController extends Controller<HttpServletRequest, Http
     
 	private boolean continueHandlersChain = false;
 	protected boolean skipUnimplementedMethods = false;
-	
-	public HttpController(ServletContext servletContext) {
-		super(servletContext);
-	}
 
 	@Override
 	public boolean handle(HttpServletRequest request, HttpServletResponse response) throws Exception { // pro 404 je potřeba přepsat tuto metodu

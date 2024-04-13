@@ -2,17 +2,11 @@ package io.github.jirkasa.servletrouter;
 
 import java.util.Map;
 
-import javax.servlet.ServletContext;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 
 public abstract class Controller<Request extends ServletRequest, Response extends ServletResponse> {
-	protected final ServletContext servletContext;
 	private Map<String, String> pathParams;
-	
-	public Controller(ServletContext servletContext) {
-		this.servletContext = servletContext;
-	}
 	
 	final void setPathParams(Map<String, String> pathParams) {
 		this.pathParams = pathParams;
