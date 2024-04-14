@@ -390,15 +390,18 @@ public abstract class Router<Request extends ServletRequest, Response extends Se
 				
 				if (pathHandler.matches(pathArray)) {
 					Handler<Request, Response> handler = pathHandler.handler;
+					
 					Map<String, String> pathParams = pathHandler.createPathParams(pathArray);
 					fillPathParams(pathParams);
 					handler.setPathParams(pathParams);
+					
 					boolean continueChain;
 					if (handler instanceof Router) {
 						continueChain = ((Router<Request, Response>) handler).handle(request, response, pathOffset + pathHandler.getPathOffsetForNextRouter(pathArray));
 					} else {
 						continueChain = handler.handle(request, response);
 					}
+					
 					if (!continueChain) return false;
 				}
 			}

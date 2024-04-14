@@ -5,8 +5,8 @@ import javax.servlet.ServletResponse;
 
 /**
  * Represents {@link io.github.jirkasa.servletrouter.Controller Controller} that can be set to {@link io.github.jirkasa.servletrouter.Router Router} using {@link io.github.jirkasa.servletrouter.Router#registerErrorController(Class) Router} method. It then catches any exceptions in the router's handle method.
- * @param <Request>
- * @param <Response>
+ * @param <Request> Type of ServletRequest.
+ * @param <Response> Type of ServletResponse.
  */
 public abstract class ErrorController<Request extends ServletRequest, Response extends ServletResponse> extends Controller<Request, Response> {
 	/** Catched exception. */

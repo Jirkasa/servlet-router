@@ -34,9 +34,10 @@ public abstract class HttpController extends Controller<HttpServletRequest, Http
 	 * @throws Exception
 	 */
 	@Override
-	public boolean handle(HttpServletRequest request, HttpServletResponse response) throws Exception { // pro 404 je potřeba přepsat tuto metodu
+	public boolean handle(HttpServletRequest request, HttpServletResponse response) throws Exception {
 		String method = request.getMethod();
 		
+		// call appropriate handle method based on request method
 		switch(method) {
 			case METHOD_GET:
 				handleGet(request, response);
@@ -66,6 +67,7 @@ public abstract class HttpController extends Controller<HttpServletRequest, Http
 				handleUnknownMethod(request, response);
 		}
 		
+		// continue handlers chain or not
 		return continueHandlersChain;
 	}
 	
@@ -232,8 +234,6 @@ public abstract class HttpController extends Controller<HttpServletRequest, Http
             
         }
         
-        // we know "allow" is not null as ALLOW_OPTIONS = true
-        // when this method is invoked
         StringBuilder allow = new StringBuilder();
         if (ALLOW_GET) {
             allow.append(METHOD_GET);
@@ -343,7 +343,7 @@ public abstract class HttpController extends Controller<HttpServletRequest, Http
 	}
 	
 	/**
-	 * Returns all declared methods of class.
+	 * Returns all declared methods of a class.
 	 * @param c Class.
 	 * @return Array of declared methods.
 	 */
@@ -356,12 +356,9 @@ public abstract class HttpController extends Controller<HttpServletRequest, Http
             Method[] thisMethods = clazz.getDeclaredMethods();
             if (allMethods != null && allMethods.length > 0) {
                 Method[] subClassMethods = allMethods;
-                allMethods =
-                    new Method[thisMethods.length + subClassMethods.length];
-                System.arraycopy(thisMethods, 0, allMethods, 0,
-                                 thisMethods.length);
-                System.arraycopy(subClassMethods, 0, allMethods, thisMethods.length,
-                                 subClassMethods.length);
+                allMethods = new Method[thisMethods.length + subClassMethods.length];
+                System.arraycopy(thisMethods, 0, allMethods, 0, thisMethods.length);
+                System.arraycopy(subClassMethods, 0, allMethods, thisMethods.length, subClassMethods.length);
             } else {
                 allMethods = thisMethods;
             }

@@ -43,10 +43,12 @@ class PathHandler<Request extends ServletRequest, Response extends ServletRespon
 	 * @return True if request path matches path for handler. Otherwise false.
 	 */
 	public boolean matches(String[] requestPath) {
-		// if handler should be used for every path
+		// if handler should be used for any path
 		if (path == null) return true;
 		
+		// if handler should match full path and length of paths differ
 		if (handler.matchesFullPath() && path.length != requestPath.length) return false;
+		
 		if (path.length > requestPath.length) return false;
 		
 		for (int i = 0; i < path.length; i++) {
@@ -60,11 +62,13 @@ class PathHandler<Request extends ServletRequest, Response extends ServletRespon
 	/**
 	 * Returns offset that should be added to path offset when router calls next router.
 	 * <p>
-	 * For example when request path is /info/about/authors and handler path is /info, it returns 1.
+	 * For example when request path is /info/about/authors and handler path is /info, it returns 1. In case if passed request path is shorter than handler path, -1 is returned.
 	 * @param requestPath Request path.
 	 * @return Offset to be added to path offset when next router is called by router.
 	 */
 	public int getPathOffsetForNextRouter(String[] requestPath) {
+		// in case request path is shorter than handler path, -1 is returned
+		// (but this method should not be called in that case)
 		if (path.length > requestPath.length) return -1; 
 		
 		int offset = 0;

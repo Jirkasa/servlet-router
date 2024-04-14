@@ -17,7 +17,7 @@ import javax.servlet.http.HttpServletResponse;
  * public class AppRouter extends HttpRouter {
  *     public AppRouter() {
  *         register("/", HomeController.class);
- *         router.register("/info", infoRouter);
+ *         register("/info", infoRouter);
  *     }
  * }
  * </pre>
