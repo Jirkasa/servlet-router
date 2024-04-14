@@ -8,6 +8,9 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+/**
+ * Implementation of {@link io.github.jirkasa.servletrouter.Controller Controller} that uses HTTP protocol (HttpServletRequest and HttpServletResponse).
+ */
 public abstract class HttpController extends Controller<HttpServletRequest, HttpServletResponse> {
 	private static final String METHOD_GET = "GET";
     private static final String METHOD_POST = "POST";
@@ -18,9 +21,18 @@ public abstract class HttpController extends Controller<HttpServletRequest, Http
     private static final String METHOD_OPTIONS = "OPTIONS";
     private static final String METHOD_TRACE = "TRACE";
     
+    /** Determines whether handlers chain should continue or not. */
 	private boolean continueHandlersChain = false;
+	/** Determines whether handlers chain should continue or not when method is not implemented in subclass. */
 	protected boolean skipUnimplementedMethods = false;
 
+	/**
+	 * Handles request. For controller that handles 404 page, this method should be overwritten.
+	 * @param request Request to be handled.
+	 * @param response Response to be handled.
+	 * @return Determines whether handlers chain should continue or not.
+	 * @throws Exception
+	 */
 	@Override
 	public boolean handle(HttpServletRequest request, HttpServletResponse response) throws Exception { // pro 404 je potřeba přepsat tuto metodu
 		String method = request.getMethod();
@@ -57,6 +69,12 @@ public abstract class HttpController extends Controller<HttpServletRequest, Http
 		return continueHandlersChain;
 	}
 	
+	/**
+	 * Handles GET requests.
+	 * @param request Request to be handled.
+	 * @param response Response to be handled.
+	 * @throws Exception
+	 */
 	protected void handleGet(HttpServletRequest request, HttpServletResponse response) throws Exception {
 		if (skipUnimplementedMethods) {
 			continueHandlersChain();
@@ -72,6 +90,12 @@ public abstract class HttpController extends Controller<HttpServletRequest, Http
 		}
 	}
 	
+	/**
+	 * Handles POST requests.
+	 * @param request Request to be handled.
+	 * @param response Response to be handled.
+	 * @throws Exception
+	 */
 	protected void handlePost(HttpServletRequest request, HttpServletResponse response) throws Exception {
 		if (skipUnimplementedMethods) {
 			continueHandlersChain();
@@ -87,6 +111,12 @@ public abstract class HttpController extends Controller<HttpServletRequest, Http
 		}
 	}
 	
+	/**
+	 * Handles PUT requests.
+	 * @param request Request to be handled.
+	 * @param response Response to be handled.
+	 * @throws Exception
+	 */
 	protected void handlePut(HttpServletRequest request, HttpServletResponse response) throws Exception {
 		if (skipUnimplementedMethods) {
 			continueHandlersChain();
@@ -102,6 +132,12 @@ public abstract class HttpController extends Controller<HttpServletRequest, Http
 		}
 	}
 	
+	/**
+	 * Handles PATCH requests.
+	 * @param request Request to be handled.
+	 * @param response Response to be handled.
+	 * @throws Exception
+	 */
 	protected void handlePatch(HttpServletRequest request, HttpServletResponse response) throws Exception {
 		if (skipUnimplementedMethods) {
 			continueHandlersChain();
@@ -117,6 +153,12 @@ public abstract class HttpController extends Controller<HttpServletRequest, Http
 		}
 	}
 	
+	/**
+	 * Handles DELETE requests.
+	 * @param request Request to be handled.
+	 * @param response Response to be handled.
+	 * @throws Exception
+	 */
 	protected void handleDelete(HttpServletRequest request, HttpServletResponse response) throws Exception {
 		if (skipUnimplementedMethods) {
 			continueHandlersChain();
@@ -132,6 +174,12 @@ public abstract class HttpController extends Controller<HttpServletRequest, Http
 		}
 	}
 	
+	/**
+	 * Handles HEAD requests.
+	 * @param request Request to be handled.
+	 * @param response Response to be handled.
+	 * @throws Exception
+	 */
 	protected void handleHead(HttpServletRequest request, HttpServletResponse response) throws Exception {
 		if (skipUnimplementedMethods) {
 			continueHandlersChain();
@@ -147,6 +195,12 @@ public abstract class HttpController extends Controller<HttpServletRequest, Http
 		}
 	}
 	
+	/**
+	 * Handles OPTIONS requests. In the vast majority of cases, it should not be overwritten in subclasses.
+	 * @param request Request to be handled.
+	 * @param response Response to be handled.
+	 * @throws Exception
+	 */
 	protected void handleOptions(HttpServletRequest request, HttpServletResponse response) throws Exception {
 		Method[] methods = getAllDeclaredMethods(this.getClass());
         
@@ -230,6 +284,12 @@ public abstract class HttpController extends Controller<HttpServletRequest, Http
         response.setHeader("Allow", allow.toString());
 	}
 	
+	/**
+	 * Handles TRACE requests. In the vast majority of cases, it should not be overwritten in subclasses.
+	 * @param request Request to be handled.
+	 * @param response Response to be handled.
+	 * @throws Exception
+	 */
 	protected void handleTrace(HttpServletRequest request, HttpServletResponse response) throws Exception {
 		int responseLength;
 
@@ -254,11 +314,19 @@ public abstract class HttpController extends Controller<HttpServletRequest, Http
         out.print(buffer.toString());
 	}
 	
-	// určuje, jestli se má pokračovat na další handlery/controllery
+	/**
+	 * When called, the handlers chain will continue (another handlers/controllers that match request path will be called).
+	 */
 	protected void continueHandlersChain() {
 		continueHandlersChain = true;
 	}
 	
+	/**
+	 * Called to handle unknown HTTP method.
+	 * @param request Request to be handled.
+	 * @param response Response to be handled.
+	 * @throws Exception
+	 */
 	private void handleUnknownMethod(HttpServletRequest request, HttpServletResponse response) throws Exception {
 		if (skipUnimplementedMethods) {
 			continueHandlersChain();
@@ -274,8 +342,11 @@ public abstract class HttpController extends Controller<HttpServletRequest, Http
 		}
 	}
 	
-	// todo - metodu na získání BASE URL
-	
+	/**
+	 * Returns all declared methods of class.
+	 * @param c Class.
+	 * @return Array of declared methods.
+	 */
 	private Method[] getAllDeclaredMethods(Class<? extends HttpController> c) {
 
         Class<?> clazz = c;

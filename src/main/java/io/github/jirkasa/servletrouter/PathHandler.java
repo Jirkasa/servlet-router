@@ -6,10 +6,22 @@ import java.util.Map;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 
+/**
+ * Component used internally by {@link io.github.jirkasa.servletrouter.Router Router} to assign handlers to specific paths. It stores path and associated handler.
+ * @param <Request> Type of ServletRequest.
+ * @param <Response> Type of ServletResponse.
+ */
 class PathHandler<Request extends ServletRequest, Response extends ServletResponse> {
+	/** Path in a form of array (for example ["info", "about", "authors"]). */
 	private String[] path;
+	/** Handler associated with path. */
 	public final Handler<Request, Response> handler;
 	
+	/**
+	 * Creates new path handler.
+	 * @param path Path.
+	 * @param handler Handler associated to path.
+	 */
 	public PathHandler(String path, Handler<Request, Response> handler) {
 		if (path != null) {
 			if (path.startsWith("/")) {
@@ -25,6 +37,11 @@ class PathHandler<Request extends ServletRequest, Response extends ServletRespon
 		this.handler = handler;
 	}
 	
+	/**
+	 * Checks whether request path matches path for handler.
+	 * @param requestPath Request path.
+	 * @return True if request path matches path for handler. Otherwise false.
+	 */
 	public boolean matches(String[] requestPath) {
 		// if handler should be used for every path
 		if (path == null) return true;
@@ -40,6 +57,13 @@ class PathHandler<Request extends ServletRequest, Response extends ServletRespon
 		return true;
 	}
 	
+	/**
+	 * Returns offset that should be added to path offset when router calls next router.
+	 * <p>
+	 * For example when request path is /info/about/authors and handler path is /info, it returns 1.
+	 * @param requestPath Request path.
+	 * @return Offset to be added to path offset when next router is called by router.
+	 */
 	public int getPathOffsetForNextRouter(String[] requestPath) {
 		if (path.length > requestPath.length) return -1; 
 		
@@ -55,6 +79,11 @@ class PathHandler<Request extends ServletRequest, Response extends ServletRespon
 		return offset;
 	}
 	
+	/**
+	 * Creates and returns map of path parameters based on passed request path and handler path.
+	 * @param requestPath Request path.
+	 * @return Map of path parameters.
+	 */
 	public Map<String, String> createPathParams(String[] requestPath) {
 		Map<String, String> pathParams = new HashMap<String, String>();
 		
