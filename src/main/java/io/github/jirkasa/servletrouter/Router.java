@@ -409,7 +409,7 @@ public abstract class Router<Request extends ServletRequest, Response extends Se
 			return true;
 		} catch(Exception e) {
 			if (errorControllerClass != null) {
-				ErrorController<Request, Response> errorController = errorControllerClass.getConstructor(ServletContext.class, Exception.class).newInstance(request.getServletContext(), e);
+				ErrorController<Request, Response> errorController = errorControllerClass.getConstructor(Exception.class).newInstance(e);
 				return errorController.handle(request, response);
 			} else {
 				throw e;
