@@ -359,13 +359,13 @@ public abstract class Router<Request extends ServletRequest, Response extends Se
 	 * @param paramName Name of path parameter.
 	 * @return Value of path parameter or null.
 	 */
-	public String getPathParam(String paramName) {
+	String getPathParam(String paramName) {
 		if (this.pathParams == null) return null;
 		return pathParams.get(paramName);
 	}
 	
 	@Override
-	public boolean handle(Request request, Response response) throws Exception {
+	public final boolean handle(Request request, Response response) throws Exception {
 		return handle(request, response, 0);
 	}
 	
