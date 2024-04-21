@@ -67,13 +67,13 @@ class PathHandler<Request extends ServletRequest, Response extends ServletRespon
 	 * @return Offset to be added to path offset when next router is called by router.
 	 */
 	public int getPathOffsetForNextRouter(String[] requestPath) {
-		// in case request path is shorter than handler path, -1 is returned
-		// (but this method should not be called in that case)
-		if (path.length > requestPath.length) return -1; 
-		
 		int offset = 0;
 		
 		if (path == null) return offset;
+		
+		// in case request path is shorter than handler path, -1 is returned
+		// (but this method should not be called in that case)
+		if (path.length > requestPath.length) return -1; 
 		
 		for (; offset < path.length; offset++) {
 			if (path[offset].startsWith(":")) continue;
