@@ -366,4 +366,99 @@ public class PathHandlerTest {
 		
 		assertEquals(pathHandler.getPathOffsetForNextRouter(path), 0);
 	}
+	
+	@Test
+	void itShouldCreateEmptyPathParamsMapIfPathIsNull() {
+		PathHandler<ServletRequest, ServletResponse> pathHandler = new PathHandler<ServletRequest, ServletResponse>(null, new Handler<ServletRequest, ServletResponse>() {
+			@Override
+			public boolean handle(ServletRequest request, ServletResponse response) throws Exception {
+				return false;
+			}
+
+			@Override
+			public void setPathParams(Map<String, String> pathParams) {}
+
+			@Override
+			public boolean matchesFullPath() {
+				return true;
+			}
+		});
+		
+		String[] path = {"app", "about", "router"};
+		
+		assertEquals(pathHandler.createPathParams(path).size(), 0);
+	}
+	
+	@Test
+	void itShouldCreateEmptyPathParamsMapIfPathDoesNotContainPathParams() {
+		PathHandler<ServletRequest, ServletResponse> pathHandler = new PathHandler<ServletRequest, ServletResponse>("app/about/router", new Handler<ServletRequest, ServletResponse>() {
+			@Override
+			public boolean handle(ServletRequest request, ServletResponse response) throws Exception {
+				return false;
+			}
+
+			@Override
+			public void setPathParams(Map<String, String> pathParams) {}
+
+			@Override
+			public boolean matchesFullPath() {
+				return true;
+			}
+		});
+		
+		String[] path = {"app", "about", "router"};
+		
+		assertEquals(pathHandler.createPathParams(path).size(), 0);
+	}
+	
+	@Test
+	void itShouldCreateMapWithPathParamNamedTest() {
+		PathHandler<ServletRequest, ServletResponse> pathHandler = new PathHandler<ServletRequest, ServletResponse>("app/about/:test", new Handler<ServletRequest, ServletResponse>() {
+			@Override
+			public boolean handle(ServletRequest request, ServletResponse response) throws Exception {
+				return false;
+			}
+
+			@Override
+			public void setPathParams(Map<String, String> pathParams) {}
+
+			@Override
+			public boolean matchesFullPath() {
+				return true;
+			}
+		});
+		
+		String[] path = {"app", "about", "router"};
+		
+		Map<String, String> pathParams = pathHandler.createPathParams(path);
+		
+		assertEquals(pathParams.size(), 1);
+		assertEquals(pathParams.get("test"), "router");
+	}
+	
+	@Test
+	void itShouldCreateMapWithPathParamsNamedCategoryAndTest() {
+		PathHandler<ServletRequest, ServletResponse> pathHandler = new PathHandler<ServletRequest, ServletResponse>("app/:category/:test", new Handler<ServletRequest, ServletResponse>() {
+			@Override
+			public boolean handle(ServletRequest request, ServletResponse response) throws Exception {
+				return false;
+			}
+
+			@Override
+			public void setPathParams(Map<String, String> pathParams) {}
+
+			@Override
+			public boolean matchesFullPath() {
+				return true;
+			}
+		});
+		
+		String[] path = {"app", "about", "router"};
+		
+		Map<String, String> pathParams = pathHandler.createPathParams(path);
+		
+		assertEquals(pathParams.size(), 2);
+		assertEquals(pathParams.get("category"), "about");
+		assertEquals(pathParams.get("test"), "router");
+	}
 }
