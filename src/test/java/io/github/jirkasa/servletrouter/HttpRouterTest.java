@@ -37,23 +37,6 @@ public class HttpRouterTest {
 		}
 	}
 	
-	// todo nejde - protože tam je přetížená metoda handle (vyzkoušet to až u controlleru)
-	/*@Test
-	void itShouldGetPathParameterInRouter() throws FailingHttpStatusCodeException, MalformedURLException, IOException {
-		try (final WebClient webClient = new WebClient()) {
-			final HtmlPage page = webClient.getPage("http://localhost:8080/servlet-router-tests/http-router/path-param/myparameter");
-			assertEquals("Parameter: myparameter", page.getTitleText());
-		}
-	}
-	
-	@Test
-	void itShouldGetPathParameterInNestedRouter() throws FailingHttpStatusCodeException, MalformedURLException, IOException {
-		try (final WebClient webClient = new WebClient()) {
-			final HtmlPage page = webClient.getPage("http://localhost:8080/servlet-router-tests/http-router/path-param-router/path-param/thisismyparameter");
-			assertEquals("Parameter: thisismyparameter", page.getTitleText());
-		}
-	}*/
-	
 	@Test
 	void itShouldRegisterSubRouter() throws FailingHttpStatusCodeException, MalformedURLException, IOException {
 		try (final WebClient webClient = new WebClient()) {

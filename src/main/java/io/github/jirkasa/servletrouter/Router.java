@@ -134,7 +134,7 @@ public abstract class Router<Request extends ServletRequest, Response extends Se
 	 * @param path Path for which the handlers and controller(s) are to be called.
 	 * @param handler1 First handler.
 	 * @param handler2 Second handler.
-	 * @param handler3 Third controller.
+	 * @param handler3 Third handler.
 	 * @param controllers Controller(s).
 	 */
 	@SafeVarargs
@@ -151,8 +151,8 @@ public abstract class Router<Request extends ServletRequest, Response extends Se
 	 * @param path Path for which the handlers and controller(s) are to be called.
 	 * @param handler1 First handler.
 	 * @param handler2 Second handler.
-	 * @param handler3 Third controller.
-	 * @param handler4 Fourth controller.
+	 * @param handler3 Third handler.
+	 * @param handler4 Fourth handler.
 	 * @param controllers Controller(s).
 	 */
 	@SafeVarargs
@@ -170,9 +170,9 @@ public abstract class Router<Request extends ServletRequest, Response extends Se
 	 * @param path Path for which the handlers and controller(s) are to be called.
 	 * @param handler1 First handler.
 	 * @param handler2 Second handler.
-	 * @param handler3 Third controller.
-	 * @param handler4 Fourth controller.
-	 * @param handler5 Fifth controller.
+	 * @param handler3 Third handler.
+	 * @param handler4 Fourth handler.
+	 * @param handler5 Fifth handler.
 	 * @param controllers Controller(s).
 	 */
 	@SafeVarargs
@@ -291,7 +291,7 @@ public abstract class Router<Request extends ServletRequest, Response extends Se
 	 * @param <T> Controller class.
 	 * @param handler1 First handler.
 	 * @param handler2 Second handler.
-	 * @param handler3 Third controller.
+	 * @param handler3 Third handler.
 	 * @param controllers Controller(s).
 	 */
 	@SafeVarargs
@@ -307,8 +307,8 @@ public abstract class Router<Request extends ServletRequest, Response extends Se
 	 * @param <T> Controller class.
 	 * @param handler1 First handler.
 	 * @param handler2 Second handler.
-	 * @param handler3 Third controller.
-	 * @param handler4 Fourth controller.
+	 * @param handler3 Third handler.
+	 * @param handler4 Fourth handler.
 	 * @param controllers Controller(s).
 	 */
 	@SafeVarargs
@@ -325,9 +325,9 @@ public abstract class Router<Request extends ServletRequest, Response extends Se
 	 * @param <T> Controller class.
 	 * @param handler1 First handler.
 	 * @param handler2 Second handler.
-	 * @param handler3 Third controller.
-	 * @param handler4 Fourth controller.
-	 * @param handler5 Fifth controller.
+	 * @param handler3 Third handler.
+	 * @param handler4 Fourth handler.
+	 * @param handler5 Fifth handler.
 	 * @param controllers Controller(s).
 	 */
 	@SafeVarargs
