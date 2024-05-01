@@ -2,18 +2,96 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>io.github.jirkasa</groupId>
   <artifactId>servlet-router</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
-  <name>servlet-router</name>
+  <version>1.0.0</version>
+  <name>${project.groupId}:${project.artifactId}</name>
+  <description>Simple lightweight library for servlet routing.</description>
+  <url>https://github.com/Jirkasa/servlet-router</url>
   
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <java.version>17</java.version>
-    <jdk.version>11</jdk.version>
     <maven.compiler.source>${java.version}</maven.compiler.source>
     <maven.compiler.target>${java.version}</maven.compiler.target>
   </properties>
   
+  <licenses>
+	<license>
+	  <name>MIT License</name>
+	  <url>http://www.opensource.org/licenses/mit-license.php</url>
+	</license>
+  </licenses>
+  
+  <developers>
+    <developer>
+      <name>Jiří Satora</name>
+      <organizationUrl>https://jirkasa.github.io/</organizationUrl>
+    </developer>
+  </developers>
+  
+  <scm>
+    <connection>scm:git:git://github.com/Jirkasa/servlet-router.git</connection>
+    <developerConnection>scm:git:ssh://github.com:Jirkasa/servlet-router.git</developerConnection>
+    <url>http://github.com/Jirkasa/servlet-router/tree/main</url>
+  </scm>
+  
+  <build>
+    <plugins>
+	  <plugin>
+		<groupId>org.apache.maven.plugins</groupId>
+		<artifactId>maven-source-plugin</artifactId>
+		<version>3.3.1</version>
+		<executions>
+		  <execution>
+		    <id>attach-sources</id>
+		    <phase>package</phase>
+		    <goals>
+		      <goal>jar-no-fork</goal>
+		    </goals>
+		  </execution>
+		</executions>
+	  </plugin>
+	  <plugin>
+		<groupId>org.apache.maven.plugins</groupId>
+		<artifactId>maven-javadoc-plugin</artifactId>
+		<version>3.6.3</version>
+		<executions>
+		  <execution>
+		    <id>attach-javadocs</id>
+		    <phase>package</phase>
+		    <goals>
+		      <goal>jar</goal>
+		    </goals>
+		  </execution>
+		</executions>
+	  </plugin>
+	  <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-gpg-plugin</artifactId>
+        <version>3.2.4</version>
+        <executions>
+          <execution>
+            <id>sign-artifacts</id>
+            <phase>verify</phase>
+            <goals>
+              <goal>sign</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.sonatype.central</groupId>
+		<artifactId>central-publishing-maven-plugin</artifactId>
+        <version>0.4.0</version>
+        <extensions>true</extensions>
+        <configuration>
+          <publishingServerId>central</publishingServerId>
+          <tokenAuth>true</tokenAuth>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+ 
   <dependencies>
 	<dependency>
 	  <groupId>javax.servlet</groupId>
