@@ -372,6 +372,7 @@ public abstract class Router<Request extends ServletRequest, Response extends Se
 			String requestPath = getRequestPath(request);
 			String[] requestPathArray = requestPath.split("/", -1);
 			String[] pathArray = Arrays.copyOfRange(requestPathArray, pathOffset, requestPathArray.length);
+			if (pathArray.length == 0) pathArray = new String[]{""};
 			
 			Iterator<PathHandler<Request, Response>> iterator = handlers.iterator();
 			

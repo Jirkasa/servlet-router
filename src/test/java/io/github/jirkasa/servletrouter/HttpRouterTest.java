@@ -45,4 +45,13 @@ public class HttpRouterTest {
 			assertEquals("Controller in subrouter.", page.getTitleText());
 		}
 	}
+	
+	@Test
+	void itShouldRegisterIndexControllerInSubrouter() throws FailingHttpStatusCodeException, MalformedURLException, IOException {
+		try (final WebClient webClient = new WebClient()) {
+			webClient.getOptions().setThrowExceptionOnFailingStatusCode(false);
+			final HtmlPage page = webClient.getPage("http://localhost:8080/servlet-router-tests/http-router/sub-router-2/");
+			assertEquals("Controller in subrouter 2.", page.getTitleText());
+		}
+	}
 }

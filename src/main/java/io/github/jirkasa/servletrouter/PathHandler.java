@@ -51,6 +51,8 @@ class PathHandler<Request extends ServletRequest, Response extends ServletRespon
 		
 		if (path.length > requestPath.length) return false;
 		
+		if (!handler.matchesFullPath() && path.length == 1 && path[0].equals("")) return true;
+		
 		for (int i = 0; i < path.length; i++) {
 			if (path[i].startsWith(":")) continue;
 			if (!path[i].equals(requestPath[i])) return false;
