@@ -1,0 +1,10 @@
+<div data-code-box data-no-buttons class="u-mb-2">
+    <pre data-code><code class="language-java">public class AppRouter extends HttpRouter {
+    public AppRouter() {
+        // register controller
+        register("/", HomeController.class);
+        // register another router (handler)
+        register("/info", new InfoRouter());
+    }
+}</code></pre>
+</div>
