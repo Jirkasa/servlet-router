@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>io.github.jirkasa</groupId>
   <artifactId>servlet-router</artifactId>
-  <version>1.0.0</version>
+  <version>1.0.1</version>
   <name>${project.groupId}:${project.artifactId}</name>
   <description>Simple lightweight library for servlet routing.</description>
   <url>https://github.com/Jirkasa/servlet-router</url>
