@@ -1,0 +1,877 @@
+<!doctype html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=yes,maximum-scale=2.2,minimum-scale=1"><link rel="icon" type="image/svg+xml" href="./static/img/favicon.svg"><meta name="author" content="Jiří Satora"><meta name="description" content="Simple lightweight library for servlet routing."><title>Servlet Router</title><script src="./static/js/highlight.min.js"></script><script>hljs.highlightAll()</script><script defer="defer" src="common.094d85ce485e92e2c2cb.js"></script><script defer="defer" src="tutorial.956b164ba7668827712c.js"></script><link href="css/style.5a99ed6fa51d07ef909c.css" rel="stylesheet"></head><body><header id="HeaderContainer" class="header"><div id="Header" class="header__container"><div class="header__content"><a href="./" class="header__home-link">Servlet Router</a> <button id="NavigationToggleButton" class="menu-toggle-button">Open/Close menu<span class="menu-toggle-button__icon"></span></button><nav id="HeaderNavigation" class="header__navigation"><ul><li><a href="https://mvnrepository.com/artifact/io.github.jirkasa/servlet-router" target="_blank" class="header__navigation-link">MVN Repository</a></li><li><a href="./javadoc/io/github/jirkasa/servletrouter/package-summary.html" target="_blank" class="header__navigation-link">JavaDoc</a></li><li><a href="https://github.com/Jirkasa/servlet-router" target="_blank" class="header__navigation-link">GitHub</a></li></ul></nav></div></div></header><div class="tutorial-page-layout"><div class="tutorial-page-layout__container"><nav id="TutorialNavigation" class="tutorial-page-layout__navigation-side"><ul class="navigation"><li><a href="#benefits-of-using-servlet-router-library" class="navigation__link">Benefits of using servlet router library</a></li><li><a href="#components" class="navigation__link">Components</a></li><li><a href="#integration-of-the-library-into-the-application" class="navigation__link">Integration of the library into the application</a></li><li><a href="#example-of-creating-a-project" class="navigation__link">Example of creating a project</a></li></ul></nav><main class="tutorial-page-layout__content"><h1 class="heading-primary u-mb-4">Servlet Router</h1><p class="paragraph u-mb-4">Servlet router is simple and lightweight library for servlet routing. You can learn how to use it on this page. Czech version is available <a href="https://jirkasa.github.io/servlety-a-jsp-navod/dalsi-tutorialy/servlet-router/" target="_blank" class="link">here</a>.</p><h2 id="benefits-of-using-servlet-router-library" class="heading-secondary u-mb-2">Benefits of using servlet router library</h2><p class="paragraph u-mb-2">Mapping URLs to servlets via the web.xml file is not the best way to perform routing in a web application. If we have a lot of servlets, it becomes quite challenging to navigate in such a file. We always have to first define the servlet there, which takes up 4 lines of code, and then we have to map it to some URL, which also takes at least 4 lines of code. And that's not even considering filters, which also need to be defined and mapped in the web.xml file. Specifying the path in the url-pattern element for mapping a servlet or filter is not very user-friendly, and it's not always easy to map the servlet to the URL we want to. Furthermore, I don't think routing for a web application should be configured somewhere. It should be hardcoded in the application code (unless we're talking about some CMS system or similar, where the user might create their own pages). These are the main reasons that led me to create a routing library and thus avoid these problems.</p><p class="paragraph u-mb-1">The advantages of using the Servlet Router library are summarized in the following list:</p><ul class="list u-mb-4"><li>no clumsy URL mapping in the web.xml configuration file</li><li>just map one entry servlet for all requests, and routing depends on the application code itself (no need to configure the web.xml file intricately)</li><li>no use of filters</li><li>no confusing setting of URL patterns</li><li>support for path parameters</li><li>better code orientation (no need to struggle to figure out what is called for which URL)</li><li>easy implementation of the MVC architecture</li><li>built-in support for the HTTP PATCH method (the HttpServlet class does not support it by default)</li></ul><h2 id="components" class="heading-secondary u-mb-2">Components</h2><p class="paragraph u-mb-4">The Servlet Router library contains three fundamental components: <a href="./javadoc/io/github/jirkasa/servletrouter/Router.html" target="_blank" class="link">Router</a>, <a href="./javadoc/io/github/jirkasa/servletrouter/Controller.html" target="_blank" class="link">Controller</a>, and <a href="./javadoc/io/github/jirkasa/servletrouter/Handler.html" target="_blank" class="link">Handler</a>. We will now take a look at each of them gradually, and you will also learn about other components built upon them.</p><h3 id="router" class="heading-tertiary u-mb-1">Router</h3><p class="paragraph u-mb-2">The Router is a component responsible for mapping controllers and handlers to specific paths. Its base class is <a href="./javadoc/io/github/jirkasa/servletrouter/Router.html" target="_blank" class="link">Router</a>. This class is abstract. It can be extended and used for routing any type of <a href="https://javaee.github.io/javaee-spec/javadocs/javax/servlet/ServletRequest.html" target="_blank" class="link">ServletRequest</a> and <a href="https://javaee.github.io/javaee-spec/javadocs/javax/servlet/ServletResponse.html" target="_blank" class="link">ServletResponse</a> object. However, in 99.9 percent of cases, you will want to route <a href="https://javaee.github.io/javaee-spec/javadocs/javax/servlet/http/HttpServletRequest.html" target="_blank" class="link">HttpServletRequest</a> and <a href="https://javaee.github.io/javaee-spec/javadocs/javax/servlet/http/HttpServletResponse.html" target="_blank" class="link">HttpServletResponse</a> objects. In such cases, you can use <a href="./javadoc/io/github/jirkasa/servletrouter/HttpRouter.html" target="_blank" class="link">HttpRouter</a>.</p><p class="paragraph u-mb-2">You can create HttpRouter either directly and then map the corresponding controllers and handlers (which I do not recommend), or you can create a subclass and perform the mapping in the constructor. The following example demonstrates the first (not recommended) approach.</p><div data-code-box data-no-buttons class="u-mb-2"><pre data-code><code class="language-java">// create router
+HttpRouter router = new HttpRouter();
+// register controller
+router.register("/", HomeController.class);
+// register another router (handler)
+router.register("/info", infoRouter);</code></pre></div><p class="paragraph u-mb-2">The following example demonstrates a better way to create the router.</p><div data-code-box data-no-buttons class="u-mb-2"><pre data-code><code class="language-java">public class AppRouter extends HttpRouter {
+    public AppRouter() {
+        // register controller
+        register("/", HomeController.class);
+        // register another router (handler)
+        register("/info", new InfoRouter());
+    }
+}</code></pre></div><p class="paragraph u-mb-2">As you may have noticed in the previous examples, the method used for mapping (registering) controllers or handlers is called register. If you look into the <a href="./javadoc/io/github/jirkasa/servletrouter/Router.html" target="_blank" class="link">JavaDoc documentation</a>, you'll see that it's overloaded at least ten times. This is because it allows registering both controller and handler classes simultaneously. In Java, it's not straightforward to pass two different types as method parameters in a type-safe manner. So, I solved it by overloading the register method multiple times to make it more user-friendly and easier to use. This allows calling it with multiple handlers or controllers in succession, as shown in the following example. You'll find out why you might want to do this later on.</p><div data-code-box data-no-buttons class="u-mb-4"><pre data-code data-code-highlight="3-7"><code class="language-java">public class AppRouter extends HttpRouter {
+    public AppRouter() {
+        register("/", HomeController.class);
+        register("/info", new InfoRouter());
+        register("/account", new RequireAuthenticationMiddleware(), new AccountRouter());
+        register("/admin", new RequireAuthenticationMiddleware(), new RequireAdminPermissionMiddleware(), new AdminRouter());
+        register(PageNotFoundController.class);
+    }
+}</code></pre></div><h3 id="controller" class="heading-tertiary u-mb-1">Controller</h3><p class="paragraph u-mb-2">Another fundamental component is the controller. Its task is to handle requests to a specific (usually) path. Similar to the router, the basic class here is the <a href="./javadoc/io/github/jirkasa/servletrouter/Controller.html" target="_blank" class="link">Controller</a> class. However, you'll most often work with the HTTP protocol and process objects of type <a href="https://javaee.github.io/javaee-spec/javadocs/javax/servlet/http/HttpServletRequest.html" target="_blank" class="link">HttpServletRequest</a> and <a href="https://javaee.github.io/javaee-spec/javadocs/javax/servlet/http/HttpServletResponse.html" target="_blank" class="link">HttpServletResponse</a>. Therefore, you'll extend the <a href="./javadoc/io/github/jirkasa/servletrouter/HttpController.html" target="_blank" class="link">HttpController</a> class for creating controllers. This class provides methods for handling requests sent using various methods (GET, POST, DELETE, etc.). The following example illustrates how a controller can look like.</p><div data-code-box data-no-buttons class="u-mb-2"><pre data-code><code class="language-java">public class ExampleController extends HttpController {
+    @Override
+    protected void handleGet(HttpServletRequest request, HttpServletResponse response) throws Exception {
+        forwardTo("/WEB-INF/jsp/ExamplePage.jsp", request, response);
+    }
+}</code></pre></div><p class="paragraph u-mb-2">The following table illustrates various methods of the HttpController class that we can override to handle different types of requests.</p><div class="table-wrapper u-mb-2"><table class="table"><thead><tr><th>Method</th><th>Description</th></tr></thead><tbody><tr><td><a href="./javadoc/io/github/jirkasa/servletrouter/HttpController.html#handle(javax.servlet.http.HttpServletRequest,javax.servlet.http.HttpServletResponse)" target="_blank" class="link">handle</a></td><td>It processes requests and invokes corresponding methods based on the method they were sent with. This method can be overridden, for example, for a controller handling the 404 page to respond to requests sent with any method.</td></tr><tr><td><a href="./javadoc/io/github/jirkasa/servletrouter/HttpController.html#handleGet(javax.servlet.http.HttpServletRequest,javax.servlet.http.HttpServletResponse)" target="_blank" class="link">handleGet</a></td><td>It handles requests sent with the GET method.</td></tr><tr><td><a href="./javadoc/io/github/jirkasa/servletrouter/HttpController.html#handlePost(javax.servlet.http.HttpServletRequest,javax.servlet.http.HttpServletResponse)" target="_blank" class="link">handlePost</a></td><td>It handles requests sent with the POST method.</td></tr><tr><td><a href="./javadoc/io/github/jirkasa/servletrouter/HttpController.html#handlePut(javax.servlet.http.HttpServletRequest,javax.servlet.http.HttpServletResponse)" target="_blank" class="link">handlePut</a></td><td>It handles requests sent with the PUT method.</td></tr><tr><td><a href="./javadoc/io/github/jirkasa/servletrouter/HttpController.html#handlePatch(javax.servlet.http.HttpServletRequest,javax.servlet.http.HttpServletResponse)" target="_blank" class="link">handlePatch</a></td><td>It handles requests sent with the PATCH method.</td></tr><tr><td><a href="./javadoc/io/github/jirkasa/servletrouter/HttpController.html#handleDelete(javax.servlet.http.HttpServletRequest,javax.servlet.http.HttpServletResponse)" target="_blank" class="link">handleDelete</a></td><td>It handles requests sent with the DELETE method.</td></tr><tr><td><a href="./javadoc/io/github/jirkasa/servletrouter/HttpController.html#handleHead(javax.servlet.http.HttpServletRequest,javax.servlet.http.HttpServletResponse)" target="_blank" class="link">handleHead</a></td><td>It handles requests sent with the HEAD method.</td></tr><tr><td><a href="./javadoc/io/github/jirkasa/servletrouter/HttpController.html#handleOptions(javax.servlet.http.HttpServletRequest,javax.servlet.http.HttpServletResponse)" target="_blank" class="link">handleOptions</a></td><td>It handles requests sent with the OPTIONS method. This method should not typically be overridden.</td></tr><tr><td><a href="./javadoc/io/github/jirkasa/servletrouter/HttpController.html#handleTrace(javax.servlet.http.HttpServletRequest,javax.servlet.http.HttpServletResponse)" target="_blank" class="link">handleTrace</a></td><td>It handles requests sent with the TRACE method. This method should not typically be overridden.</td></tr></tbody></table></div><p class="paragraph u-mb-2">Except for the handleOptions and handleTrace methods, the aforementioned methods for handling requests sent with specific methods do not have a default implementation. By default, an error page with status code 405 (Method Not Allowed) is sent for them. If instead we want to skip unimplemented methods and continue routing the request to other handlers/controllers, we can set the property <a href="./javadoc/io/github/jirkasa/servletrouter/HttpController.html#skipUnimplementedMethods" target="_blank" class="link">skipUnimplementedMethods</a> to true, as shown in the following example.</p><div data-code-box data-no-buttons class="u-mb-2"><pre data-code data-code-highlight="3-5"><code class="language-java">public class ExampleController extends HttpController {
+    public ExampleController() {
+        // For unimplemented methods, an error page will not be sent;
+        // instead, the request routing will continue to the next handlers/controllers.
+        this.skipUnimplementedMethods = true;
+    }
+
+    @Override
+    protected void handleGet(HttpServletRequest request, HttpServletResponse response) throws Exception {
+        forwardTo("/WEB-INF/jsp/ExamplePage.jsp", request, response);
+    }
+}</code></pre></div><p class="paragraph u-mb-2">When a controller is found during the routing of a request to handle it, the request no longer traverses through additional handlers or another controller. If we want the routing of the request to continue further, we have the option to call the method <a href="./javadoc/io/github/jirkasa/servletrouter/HttpController.html#continueHandlersChain()" target="_blank" class="link">continueHandlersChain</a>, as shown in the following example. You may not yet understand precisely what I mean by routing the request, but once we start creating a sample project, you'll likely grasp it.</p><div data-code-box data-no-buttons class="u-mb-2"><pre data-code data-code-highlight="12"><code class="language-java">public class ProductController extends HttpController {
+    @Override
+    protected void handleGet(HttpServletRequest request, HttpServletResponse response) throws Exception {
+        String productId = req.getParameter("productId");
+
+        Product product = DBUtil.loadProductById(productId);
+
+        if (product) {
+            request.setAttribute("product", product);
+            forwardTo("/WEB-INF/jsp/ProductPage.jsp", request, response);
+        } else {
+            continueHandlersChain();
+        }
+    }
+}</code></pre></div><p class="paragraph u-mb-2">One thing you typically wouldn't do with traditional servlets is directly retrieve a parameter from the URL path. However, with the Servlet Router library, it's straightforward. You just need to define a parameter in the path during its registration in the router by using the ":" character followed by a name. Then, you can retrieve the parameter in the controller using the <a href="./javadoc/io/github/jirkasa/servletrouter/Controller.html#getPathParam(java.lang.String)" target="_blank" class="link">getPathParam</a> method. The following example demonstrates this more clearly.</p><div data-code-box class="u-mb-2"><pre data-code="MyRouter.java" data-active data-code-highlight="3"><code class="language-java">public class MyRouter extends HttpRouter {
+    public MyRouter() {
+        register("/example/:myParam", MyController.class);
+    }
+}</code></pre><pre data-code="MyController.java" data-code-highlight="4"><code class="language-java">public class MyController extends HttpController {
+    @Override
+    protected void handleGet(HttpServletRequest request, HttpServletResponse response) throws Exception {
+        String param = getPathParam("myParam");
+        request.setAttribute("myPathParameter", param);
+        forwardTo("/WEB-INF/jsp/ExamplePage.jsp", request, response);
+    }
+}</code></pre></div><p class="paragraph u-mb-2">A good practice is not to directly extend the HttpController class for creating controllers but to create your own base controller class. This way, you can define methods for operations commonly performed in controllers. The following example illustrates an example of such a basic controller.</p><div data-code-box data-no-buttons class="u-mb-4"><pre data-code><code class="language-java">public abstract class MyAppController extends HttpController {
+
+    protected void login(HttpServletRequest request, User user) {
+        HttpSession session = request.getSession();
+        session.setAttribute("LOGGED_USER", user);
+    }
+
+    protected void logout(HttpServletRequest request) {
+        HttpSession session = request.getSession();
+        session.removeAttribute("LOGGED_USER");
+    }
+
+}</code></pre></div><h3 id="handler" class="heading-tertiary u-mb-1">Handler</h3><p class="paragraph u-mb-2">The Router can register both controllers and handlers. You already know what a controller is, but we haven't discussed handlers yet. Handlers are a similar component to controllers, as they also serve to process requests. The difference is that with controllers, we register the controller class in the router, whereas with handlers, we register an instance of the class. Any class implementing the <a href="./javadoc/io/github/jirkasa/servletrouter/Handler.html" target="_blank" class="link">Handler</a> interface can become a handler. This interface defines methods described in the following table.</p><div class="table-wrapper u-mb-2"><table class="table"><thead><tr><th>Method</th><th>Description</th></tr></thead><tbody><tr><td><a href="./javadoc/io/github/jirkasa/servletrouter/Handler.html#handle(Request,Response)" target="_blank" class="link">handle(Request request, Response response)</a></td><td>It is called to process the request. It returns a boolean value indicating whether the routing of the request should continue (true) or stop (false).</td></tr><tr><td><a href="./javadoc/io/github/jirkasa/servletrouter/Handler.html#matchesFullPath()" target="_blank" class="link">matchesFullPath()</a></td><td>The return value of this boolean-typed method determines whether the path must match the request path exactly or if it's sufficient for the beginning of the request path to match.</td></tr><tr><td><a href="./javadoc/io/github/jirkasa/servletrouter/Handler.html#setPathParams(java.util.Map)" target="_blank" class="link">setPathParams(Map&lt;String, String&gt; pathParams)</a></td><td>This method is called before invoking the handle method to set up a map containing parameters in the path (path parameters).</td></tr></tbody></table></div><p class="paragraph u-mb-2">The following example illustrates an example of creating a handler.</p><div data-code-box class="u-mb-2"><pre data-code="MyHandler.java" data-active><code class="language-java">public class MyHandler implements Handler&lt;HttpServletRequest, HttpServletResponse&gt; {
+    private Map&lt;String, String&gt; pathParams;
+
+    @Override
+    public boolean handle(HttpServletRequest request, HttpServletResponse response) throws Exception {
+        request.setAttribute("test", pathParams.get("test"));
+        return true;
+    }
+
+    @Override
+    public void matchesFullPath() {
+        return false;
+    }
+
+    @Override
+    public void setPathParams(Map&lt;String, String&gt; pathParams) {
+        this.pathParams = pathParams;
+    }
+}</code></pre><pre data-code="MyRouter.java"><code class="language-java">public class MyRouter extends HttpRouter {
+    public MyRouter() {
+        register("/example/:test", new MyHandler(), MyController.class);
+    }
+}</code></pre></div><p class="paragraph u-mb-2">Typically, you wouldn't directly implement the Handler interface for creating handlers. Instead, when creating handlers, you'll usually extend the <a href="./javadoc/io/github/jirkasa/servletrouter/HttpMiddleware.html" target="_blank" class="link">HttpMiddleware</a> class. You can find out more about what this entails a little further below.</p><p class="paragraph u-mb-2">The Handler interface is also implemented by the Router class, making the router essentially a handler itself. This allows us to nest routers within each other. An example is shown in the following demonstration.</p><div data-code-box class="u-mb-4"><pre data-code="AppRouter.java" data-active data-code-highlight="4-5"><code class="language-java">public class AppRouter extends HttpRouter {
+    public AppRouter() {
+        register("/", HomeController.class);
+        register("/info", new InfoRouter());
+        register("/products", new ProductsRouter());
+    }
+}</code></pre><pre data-code="InfoRouter.java"><code class="language-java">public class InfoRouter extends HttpRouter {
+    public InfoRouter() {
+        register("/about", AboutController.class);
+        register("/about-products", AboutProductsController.class);
+    }
+}</code></pre><pre data-code="ProductsRouter.java"><code class="language-java">public class ProductsRouter extends HttpRouter {
+    public ProductsRouter() {
+        register("/glasses", GlassesController.class);
+        register("/computers", ComputersController.class);
+    }
+}</code></pre></div><h3 id="middleware" class="heading-tertiary u-mb-1">Middleware</h3><p class="paragraph u-mb-2">Middleware, like controllers, is used to process requests. However, it's typically employed just to perform some action on the request, and the routing of the request can continue. Middleware can be used, for example, to restrict access to selected controllers only for logged-in users, to set some attribute on the request, and so on. The base class is the <a href="./javadoc/io/github/jirkasa/servletrouter/Middleware.html" target="_blank" class="link">Middleware</a> class, but in the vast majority of cases, you'll want to work with the HTTP protocol, so you can inherit from the <a href="./javadoc/io/github/jirkasa/servletrouter/HttpMiddleware.html" target="_blank" class="link">HttpMiddleware</a> class when creating middleware.</p><p class="paragraph u-mb-2">The following example illustrates an example of middleware that checks whether the user is logged in. If so, it allows the request to proceed; otherwise, it redirects the user to the login page.</p><div data-code-box class="u-mb-2"><pre data-code="RequireLoginMiddleware.java" data-active><code class="language-java">public class RequireLoginMiddleware extends HttpMiddleware {
+    @Override
+    public boolean handle(HttpServletRequest request, HttpServletResponse response) throws Exception {
+        HttpSession session = request.getSession();
+
+        // if the user is logged in, the request continues
+        if (session.getAttribute("LOGGED_USER") != null) return true;
+
+        // otherwise, the user is redirected to the login page
+        response.sendRedirect(request.getAttribute("BASE_URL") + "/login");
+        return false;
+    }
+}</code></pre><pre data-code="AppRouter.java" data-code-highlight="6"><code class="language-java">public class AppRouter extends HttpRouter {
+    public AppRouter() {
+        register(new BaseURLAttributeSetter());
+        register("/", HomeController.class);
+        register("/login", LoginController.class);
+        register("/games", new RequireLoginMiddleware(), new GamesRouter());
+    }
+}</code></pre></div><p class="paragraph u-mb-2">Middleware is a handler and therefore implements the Handler interface. The setPathParams and matchesFullPath methods are already implemented for us. Storing parameters in the path is the same for every middleware, so it would be unnecessary to perform this in every middleware we create. Instead of retrieving parameters from the URL path, we can use the <a href="./javadoc/io/github/jirkasa/servletrouter/Middleware.html#getPathParam(java.lang.String)" target="_blank" class="link">getPathParam</a> method. The matchesFullPath method is already implemented because, for most middleware, we want only the beginning of the request path to match. If this doesn't suit our needs, we can override the matchesFullPath method.</p><p class="paragraph u-mb-2">The Servlet Router library provides a pre-built middleware that you'll likely want to register at the beginning of your application. It's called <a href="./javadoc/io/github/jirkasa/servletrouter/BaseURLAttributeSetter.html" target="_blank" class="link">BaseURLAttributeSetter</a>. Its purpose is to set an attribute containing the root URL of your application into the request. Therefore, you don't need to use relative paths when setting paths to various assets in JSP pages, which prevents those JSP pages from being used for URLs with different lengths. The following example shows how to register this middleware. The default name for the attribute is "BASE_URL", but you can change it by passing a name into the constructor.</p><div data-code-box class="u-mb-4"><pre data-code="AppRouter.java" data-active data-code-highlight="3"><code class="language-java">public class AppRouter extends HttpRouter {
+    public AppRouter() {
+        register(new BaseURLAttributeSetter());
+        register("/", HomeController.class);
+    }
+}</code></pre><pre data-code="HomeController.java"><code class="language-java">public class HomeController extends HttpController {
+    @Override
+    protected void handleGet(HttpServletRequest request, HttpServletResponse response) throws Exception {
+        // forward request to JSP page
+        forwardTo("/WEB-INF/jsp/HomePage.jsp", request, response);
+    }
+}</code></pre><pre data-code="HomePage.jsp" data-code-highlight="8-9"><code class="language-html">&lt;%@page contentType="text/html" pageEncoding="UTF-8"%&gt;
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;title&gt;Home Page&lt;/title&gt;
+
+    &lt;link rel="icon" type="image/svg+xml" href="${BASE_URL}/static/img/favicon.svg"&gt;
+    &lt;link href="${BASE_URL}/static/css/style.css" rel="stylesheet"&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;h1&gt;Welcome!&lt;/h1&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre></div><h3 id="error-controller" class="heading-tertiary u-mb-1">Error controller</h3><p class="paragraph u-mb-2">The Router allows you to set a special controller designed to handle exceptions. You can register it using the <a href="./javadoc/io/github/jirkasa/servletrouter/Router.html#registerErrorController(java.lang.Class)" target="_blank" class="link">registerErrorController</a> method. If an error controller is set for the router, it will be called when an exception occurs. Otherwise, the router will throw the exception instead.</p><p class="paragraph u-mb-2">The base class for creating an error controller is the <a href="./javadoc/io/github/jirkasa/servletrouter/ErrorController.html" target="_blank" class="link">ErrorController</a> class. However, when working with the HTTP protocol, we can utilize the <a href="./javadoc/io/github/jirkasa/servletrouter/HttpErrorController.html" target="_blank" class="link">HttpErrorController</a> class to create an error controller. The following example illustrates how such an error controller might look. To retrieve the error in the handle method, we can use the <a href="./javadoc/io/github/jirkasa/servletrouter/ErrorController.html#getException()" target="_blank" class="link">getException</a> method.</p><div data-code-box class="u-mb-4"><pre data-code="MyErrorController.java" data-active><code class="language-java">public class MyErrorController extends HttpErrorController {
+    public MyErrorController(Exception exception) {
+        super(exception);
+    }
+
+    @Override
+    public boolean handle(HttpServletRequest request, HttpServletResponse response) throws Exception {
+        // log error message to console
+        System.out.println(getException().getMessage());
+
+        // set 500 HTTP status
+        response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        
+        // display error page
+        forwardTo("/WEB-INF/jsp/ErrorPage.jsp", request, response);
+
+        return false;
+    }
+}</code></pre><pre data-code="AppRouter.java" data-code-highlight="6"><code class="language-java">public class AppRouter extends HttpRouter {
+    public AppRouter() {
+        register(new BaseURLAttributeSetter());
+        register("/", HomeController.class);
+
+        registerErrorController(MyErrorController.class);
+    }
+}</code></pre></div><h2 id="integration-of-the-library-into-the-application" class="heading-secondary u-mb-2">Integration of the library into the application</h2><p class="paragraph u-mb-2">When using the Servlet Router library, you only need to create a single servlet, which you map for all incoming requests in the web.xml file. In this servlet, you typically call the <a href="./javadoc/io/github/jirkasa/servletrouter/Router.html#handle(Request,Response)" target="_blank" class="link">handle</a> method of an entry router of your web application when a request arrives for processing. The following example demonstrates how such a servlet might look.</p><div data-code-box data-no-buttons class="u-mb-2"><pre data-code><code class="language-java">public class AppServlet extends HttpServlet {
+    AppRouter appRouter = new AppRouter();
+    
+    @Override
+    protected void service(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
+        try {
+            appRouter.handle(req, res);
+        } catch (Exception e) {
+            System.out.println(e);
+            res.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Something went wrong.");
+        }
+    }
+}</code></pre></div><p class="paragraph u-mb-2">How to map a servlet to all incoming requests in the web.xml file is shown in the following example. Additionally, it's important to determine the name of the folder containing static assets such as CSS files, images, etc., located in the webapp directory, and map its path to the default servlet. When all requests are directed to the servlet, access to content in the webapp directory (except JSP files - unfortunately...) is blocked. This limitation frustrates me about JSP. Even though access to the webapp folder is blocked in this way, users can still access JSP files. Therefore, JSP files must be placed in the WEB-INF folder, where direct access is not allowed. The default servlet is used to access static resources, and most web servers have it. For Tomcat, this servlet is named "default".</p><div data-code-box data-no-buttons class="u-mb-4"><pre data-code><code class="language-xml">&lt;web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xmlns="http://java.sun.com/xml/ns/javaee"
+xmlns:web="http://Java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
+xsi:schemaLocation="http://java.sun.com/xml/ns/javaee
+http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd" 
+id="WebApp_ID" version="3.0"&gt;
+    &lt;servlet&gt;
+        &lt;servlet-name&gt;AppServlet&lt;/servlet-name&gt;
+        &lt;servlet-class&gt;com.example.app.AppServlet&lt;/servlet-class&gt;
+    &lt;/servlet&gt;
+    &lt;servlet-mapping&gt;
+        &lt;servlet-name&gt;AppServlet&lt;/servlet-name&gt;
+        &lt;url-pattern&gt;/&lt;/url-pattern&gt;
+    &lt;/servlet-mapping&gt;
+    &lt;servlet-mapping&gt;
+        &lt;servlet-name&gt;default&lt;/servlet-name&gt;
+        &lt;url-pattern&gt;/static/*&lt;/url-pattern&gt;
+    &lt;/servlet-mapping&gt;
+&lt;/web-app&gt;</code></pre></div><h2 id="example-of-creating-a-project" class="heading-secondary u-mb-2">Example of creating a project</h2><p class="paragraph u-mb-2">You might want to see how to use the Servlet Router library in a project. Let's dive into creating a sample application. It will be a simple website with a main page, a page displaying a list of products, and a product detail page. The administrator will have the ability to add products and will be able to log in. The following diagram shows what the structure of the website will look like.</p><img src="../../static/img/illustrations/ServletRouterExampleAppStructure.svg" alt="Structure of web application" class="image image--full-width u-mb-4"><p class="paragraph u-mb-2">We'll start by creating a new Maven project, which we can name "servlet-router-example-app." In the pom.xml file, we'll add the Servlet Router library to the project as a dependency, along with servlets, as shown in the following example.</p><div data-project="1" data-project-name="servlet-router-example-app" class="u-mb-2"><ul data-project-folders><li>src<ul><li>main<ul><li data-java-packages-folder>java</li><li>resources</li><li>webapp</li></ul></li><li>test<ul><li>java</li><li>resources</li></ul></li></ul></li><li>target</li></ul><pre data-code="pom.xml" data-active data-code-highlight="17-29"><code class="language-xml">&lt;project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd"&gt;
+    &lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;
+    &lt;groupId&gt;io.github.jirkasa&lt;/groupId&gt;
+    &lt;artifactId&gt;servlet-router-example-app&lt;/artifactId&gt;
+    &lt;version&gt;0.0.1-SNAPSHOT&lt;/version&gt;
+    &lt;packaging&gt;war&lt;/packaging&gt;
+    &lt;name&gt;servlet-router-example-app&lt;/name&gt;
+
+    &lt;properties&gt;
+        &lt;project.build.sourceEncoding&gt;UTF-8&lt;/project.build.sourceEncoding&gt;
+        &lt;project.reporting.outputEncoding&gt;UTF-8&lt;/project.reporting.outputEncoding&gt;
+        &lt;java.version&gt;17&lt;/java.version&gt;
+        &lt;maven.compiler.source&gt;${java.version}&lt;/maven.compiler.source&gt;
+        &lt;maven.compiler.target&gt;${java.version}&lt;/maven.compiler.target&gt;
+    &lt;/properties&gt;
+
+    &lt;dependencies&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;javax.servlet&lt;/groupId&gt;
+            &lt;artifactId&gt;javax.servlet-api&lt;/artifactId&gt;
+            &lt;version&gt;4.0.1&lt;/version&gt;
+            &lt;scope&gt;provided&lt;/scope&gt;
+        &lt;/dependency&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;io.github.jirkasa&lt;/groupId&gt;
+            &lt;artifactId&gt;servlet-router&lt;/artifactId&gt;
+            &lt;version&gt;1.0.1&lt;/version&gt;
+        &lt;/dependency&gt;
+    &lt;/dependencies&gt;
+&lt;/project&gt;</code></pre></div><p class="paragraph u-mb-2">The first thing we can do is to create the root router of our application. We can name it something like "AppRouter." For now, it will be empty, but at the beginning, we'll register the <a href="./javadoc/io/github/jirkasa/servletrouter/BaseURLAttributeSetter.html" target="_blank" class="link">BaseURLAttributeSetter</a> for setting the attribute containing the root URL of our application. We can create a Java package for it, perhaps named com.example.app.routes, and create it there.</p><div data-project="2" data-project-extends="1" class="u-mb-2"><pre data-code="AppRouter.java" data-java-package="com.example.app.routes" data-java-package-opened data-active><code class="language-java">package com.example.app.routes;
+
+import io.github.jirkasa.servletrouter.BaseURLAttributeSetter;
+import io.github.jirkasa.servletrouter.HttpRouter;
+
+public class AppRouter extends HttpRouter {
+    public AppRouter() {
+        register(new BaseURLAttributeSetter());
+    }
+}</code></pre></div><p class="paragraph u-mb-2">Now we can create the entry servlet for our application (perhaps in the package com.example.app). When a request arrives for processing, we'll pass it to our root router using the handle method. We need to wrap the call to this method in a try-catch block. This ensures that if any error occurs in the router, we catch it. Later, we'll also create a custom error controller, so there may not be any exceptions thrown to this try-catch block. However, for safety, we'll return an error page using the sendError method, in case an error does reach this point.</p><div data-project="3" data-project-extends="2" class="u-mb-2"><pre data-code="AppServlet.java" data-java-package="com.example.app" data-java-package-opened data-active><code class="language-java">package com.example.app;
+
+import java.io.IOException;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import com.example.app.routes.AppRouter;
+
+public class AppServlet extends HttpServlet {
+    AppRouter appRouter = new AppRouter();
+    
+    @Override
+    protected void service(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
+        try {
+            appRouter.handle(req, res);
+        } catch (Exception e) {
+            System.out.println(e);
+            res.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Something went wrong.");
+        }
+    }
+}</code></pre></div><p class="paragraph u-mb-2">We'll map the created servlet for all incoming requests. In the webapp directory, we'll create a subdirectory named WEB-INF, and within it, a file named web.xml, where we'll map our servlet. The following example shows its content.</p><div data-project="4" data-project-extends="3" class="u-mb-2"><ul data-project-commands><li data-command-create-folder>src/main/webapp/WEB-INF</li><li data-command-open-folder-to-root>src/main/webapp/WEB-INF</li></ul><pre data-code="web.xml" data-folder="src/main/webapp/WEB-INF" data-active><code class="language-xml">&lt;web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xmlns="http://java.sun.com/xml/ns/javaee"
+xmlns:web="http://Java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
+xsi:schemaLocation="http://java.sun.com/xml/ns/javaee
+http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd" 
+id="WebApp_ID" version="3.0"&gt;
+    &lt;servlet&gt;
+        &lt;servlet-name&gt;AppServlet&lt;/servlet-name&gt;
+        &lt;servlet-class&gt;com.example.app.AppServlet&lt;/servlet-class&gt;
+    &lt;/servlet&gt;
+    &lt;servlet-mapping&gt;
+        &lt;servlet-name&gt;AppServlet&lt;/servlet-name&gt;
+        &lt;url-pattern&gt;/&lt;/url-pattern&gt;
+    &lt;/servlet-mapping&gt;
+&lt;/web-app&gt;</code></pre></div><p class="paragraph u-mb-2">We have the basic setup of the project ready. Now let's start creating the homepage. But before we do that, let's create our own basic controller class instead of directly inheriting from the <a href="./javadoc/io/github/jirkasa/servletrouter/HttpController.html" target="_blank" class="link">HttpController</a> class. This is a good practice because in this base class, we can define methods for code that we may frequently use in multiple controllers. Let's create an abstract base class for controllers, which we can name something like ExampleAppController. It will inherit from the HttpController class, and in our example, it will be empty. However, it doesn't matter, as the main point is that we'll have the ability to extend the base class for controllers at any time without modifying existing controllers. We can create it in the root package, perhaps com.example.app.</p><div data-project="5" data-project-extends="4" class="u-mb-2"><pre data-code="ExampleAppController.java" data-java-package="com.example.app" data-java-package-opened data-active><code class="language-java">package com.example.app;
+
+import io.github.jirkasa.servletrouter.HttpController;
+
+public abstract class ExampleAppController extends HttpController {}</code></pre></div><p class="paragraph u-mb-2">After creating the base class, we can start creating the controller for the homepage. We'll create it in the package com.example.app.routes and name it something like HomeController. This controller will be very simple, as it will just pass the request for processing to a JSP file for rendering the HTML page.</p><div data-project="6" data-project-extends="5" class="u-mb-2"><pre data-code="HomeController.java" data-java-package="com.example.app.routes" data-java-package-opened data-active><code class="language-java">package com.example.app.routes;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import com.example.app.ExampleAppController;
+
+public class HomeController extends ExampleAppController {
+    @Override
+    protected void handleGet(HttpServletRequest request, HttpServletResponse response) throws Exception {
+        forwardTo("/WEB-INF/jsp/HomePage.jsp", request, response);
+    }
+}</code></pre></div><p class="paragraph u-mb-2">Now let's create the JSP page. In the WEB-INF directory (so that users cannot directly access JSP pages), we'll create a folder named jsp, and within it, a file named "HomePage.jsp". In the following example, you can view its code. The main page will simply display a welcome message and show a link to the product list page. You may notice that in the link, we're using the BASE_URL attribute, which is set by the BaseURLAttributeSetter middleware. This attribute contains the root URL of our application.</p><div data-project="7" data-project-extends="6" class="u-mb-2"><ul data-project-commands><li data-command-create-folder>src/main/webapp/WEB-INF/jsp</li><li data-command-open-folder-to-root>src/main/webapp/WEB-INF/jsp</li></ul><pre data-code="HomePage.jsp" data-folder="src/main/webapp/WEB-INF/jsp" data-active><code class="language-html">&lt;%@page contentType="text/html" pageEncoding="UTF-8"%&gt;
+&lt;%@ include file="./includes/PageStart.jsp" %&gt;
+    &lt;h1&gt;Welcome&lt;/h1&gt;
+    &lt;p&gt;This website represents a sample application for the Servlet Router library. By clicking on the link below, you can view the list of products.&lt;/p&gt;
+    &lt;a href="${BASE_URL}/products" class="button"&gt;List of products&lt;/a&gt;
+&lt;%@ include file="./includes/PageEnd.jsp" %&gt;</code></pre></div><p class="paragraph u-mb-2">In the previous code for the homepage, we used an include directive to include content from other files. However, we haven't created those files yet, so let's do that now. We're doing this because the beginning and end of the page will be common to all pages in our application.</p><p class="paragraph u-mb-2">The first file included at the beginning will contain the code for the start of the page. Let's create it in a folder named includes, which we'll create, and name it "PageStart.jsp". Its content is shown in the following example.</p><div data-project="8" data-project-extends="7" class="u-mb-2"><ul data-project-commands><li data-command-create-folder>src/main/webapp/WEB-INF/jsp/includes</li><li data-command-open-folder-to-root>src/main/webapp/WEB-INF/jsp/includes</li></ul><pre data-code="PageStart.jsp" data-folder="src/main/webapp/WEB-INF/jsp/includes" data-active><code class="language-html">&lt;%@page contentType="text/html" pageEncoding="UTF-8"%&gt;
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;title&gt;Example app&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;div class="page"&gt;</code></pre></div><p class="paragraph u-mb-2">The file included at the end will contain the code for the end of the page. In the includes folder, let's create a file named "PageEnd.jsp". You can see its code in the example below.</p><div data-project="9" data-project-extends="8" class="u-mb-2"><ul data-project-commands><li data-command-open-folder-to-root>src/main/webapp/WEB-INF/jsp/includes</li></ul><pre data-code="PageEnd.jsp" data-folder="src/main/webapp/WEB-INF/jsp/includes" data-active><code class="language-html">&lt;%@page contentType="text/html" pageEncoding="UTF-8"%&gt;
+    &lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre></div><p class="paragraph u-mb-2">The last thing we need to do for the homepage is register the controller in the router, as shown in the following example.</p><div data-project="10" data-project-extends="9" class="u-mb-2"><pre data-code="AppRouter.java" data-java-package="com.example.app.routes" data-java-package-opened data-active data-code-highlight="9"><code class="language-java">package com.example.app.routes;
+
+import io.github.jirkasa.servletrouter.BaseURLAttributeSetter;
+import io.github.jirkasa.servletrouter.HttpRouter;
+
+public class AppRouter extends HttpRouter {
+    public AppRouter() {
+        register(new BaseURLAttributeSetter());
+        register("/", HomeController.class);
+    }
+}</code></pre></div><p class="paragraph u-mb-2">Now you can run the application, and after visiting <a href="http://localhost:8080/servlet-router-example-app/" target="_blank" class="link">http://localhost:8080/servlet-router-example-app/</a>, you should see the page as shown in the following image.</p><img src="../../static/img/screenshots/ExampleAppHomePage.png" alt="Main page of application" class="image image--full-width image--with-border u-mb-2"><p class="paragraph u-mb-2">Now let's style the page using CSS styles. This leads us to creating a folder in the webapp directory where we'll put things like images, JavaScript files, CSS styles, and so on. We need to map this folder to the default servlet; otherwise, all requests for these files would go to our servlet named "AppServlet". Let's create this folder and name it something like "static". Then we can create a file for CSS styles in it. The code for it is shown in the following example, so you can copy it.</p><div data-project="11" data-project-extends="10" class="u-mb-2"><ul data-project-commands><li data-command-create-folder>src/main/webapp/static</li><li data-command-open-folder-to-root>src/main/webapp/static</li></ul><pre data-code="style.css" data-folder="src/main/webapp/static" data-active><code class="language-css">*, *::before, *::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: inherit;
+}
+
+html {
+    font-size: 62.5%; /* 1rem = 10px */
+}
+
+body {
+    box-sizing: border-box;
+    overflow-x: hidden;
+    
+    padding: 1.6rem;
+    background-color: #F4EFEA;
+}
+
+.page {
+    width: 100%;
+    max-width: 80rem;
+    background-color: #FFFFFF;
+    
+    margin: 0 auto;
+    padding: 1.6rem;
+}
+
+h1 {
+    font-size: 3.2rem;
+    line-height: 1;
+    
+    color: #292726;
+    
+    margin-bottom: .8rem;
+}
+
+p {
+    font-size: 1.6rem;
+    color: #5B5854;
+    
+    margin-bottom: .8rem;
+}
+
+.button, .button:link, .button:visited {
+    font-family: inherit;
+    font-size: 1.6rem;
+    font-weight: 500;
+    line-height: 2rem;
+    
+    display: inline-block;
+    
+    text-transform: uppercase;
+    text-decoration: none;
+    color: #292726;
+    background-color: #F8E4B9;
+    border: none;
+    border-radius: .4rem;
+
+    padding: 1.2rem 1.6rem;
+
+    cursor: pointer;
+}
+
+table {
+	font-size: 1.6rem;
+	border-collapse: collapse;
+	width: 100%;
+}
+td, th {
+	border: 1px solid #292726;
+	padding: .8rem 1.2rem;
+}</code></pre></div><p class="paragraph u-mb-2">In the PageStart.jsp file, which contains the code for the start of the page, we'll include the CSS style file. We'll use the BASE_URL attribute to make it work for any page where the PageStart.jsp file is included.</p><div data-project="12" data-project-extends="11" class="u-mb-2"><ul data-project-commands><li data-command-open-folder-to-root>src/main/webapp/WEB-INF/jsp/includes</li></ul><pre data-code="PageStart.jsp" data-folder="src/main/webapp/WEB-INF/jsp/includes" data-active data-code-highlight="8"><code class="language-html">&lt;%@page contentType="text/html" pageEncoding="UTF-8"%&gt;
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;title&gt;Example app&lt;/title&gt;
+    
+    &lt;link href="${BASE_URL}/static/style.css" rel="stylesheet"&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;div class="page"&gt;</code></pre></div><p class="paragraph u-mb-2">In the web.xml file, we'll map our newly created static folder to the default servlet, as shown in the following example.</p><div data-project="13" data-project-extends="12" class="u-mb-2"><ul data-project-commands><li data-command-create-folder>src/main/webapp/WEB-INF</li><li data-command-open-folder-to-root>src/main/webapp/WEB-INF</li></ul><pre data-code="web.xml" data-folder="src/main/webapp/WEB-INF" data-active data-code-highlight="15-18"><code class="language-xml">&lt;web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xmlns="http://java.sun.com/xml/ns/javaee"
+xmlns:web="http://Java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
+xsi:schemaLocation="http://java.sun.com/xml/ns/javaee
+http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd" 
+id="WebApp_ID" version="3.0"&gt;
+    &lt;servlet&gt;
+        &lt;servlet-name&gt;AppServlet&lt;/servlet-name&gt;
+        &lt;servlet-class&gt;com.example.app.AppServlet&lt;/servlet-class&gt;
+    &lt;/servlet&gt;
+    &lt;servlet-mapping&gt;
+        &lt;servlet-name&gt;AppServlet&lt;/servlet-name&gt;
+        &lt;url-pattern&gt;/&lt;/url-pattern&gt;
+    &lt;/servlet-mapping&gt;
+    &lt;servlet-mapping&gt;
+        &lt;servlet-name&gt;default&lt;/servlet-name&gt;
+        &lt;url-pattern&gt;/static/*&lt;/url-pattern&gt;
+    &lt;/servlet-mapping&gt;
+&lt;/web-app&gt;</code></pre></div><p class="paragraph u-mb-2">After restarting the server and refreshing the page, you should see that the page has been styled.</p><img src="../../static/img/screenshots/ExampleAppHomePage.png" alt="Main page of application" class="image image--full-width image--with-border u-mb-2"><p class="paragraph u-mb-2">We have the main page of our application. Now let's create pages for the admin. These will be handled by a separate router. Let's create it and place it in a new package, perhaps named com.example.app.routes.admin. It's up to you how you want to organize your classes into packages. In this sample application, I've decided to create separate packages for each router and its controllers.</p><div data-project="14" data-project-extends="13" class="u-mb-2"><pre data-code="AdminRouter.java" data-java-package="com.example.app.routes.admin" data-java-package-opened data-active><code class="language-java">package com.example.app.routes.admin;
+
+import io.github.jirkasa.servletrouter.HttpRouter;
+
+public class AdminRouter extends HttpRouter {
+    public AdminRouter() {
+        
+    }
+}</code></pre></div><p class="paragraph u-mb-2">As the first step, let's create the home page for the admin. It will contain only a heading "Administration" and a link to the page for adding a new product. We'll need a controller and a JSP page for this. The following examples show them. The file name for the page is "AdminHomePage.jsp".</p><div data-project="15" data-project-extends="14" class="u-mb-4"><pre data-code="AdminHomeController.java" data-java-package="com.example.app.routes.admin" data-java-package-opened data-active><code class="language-java">package com.example.app.routes.admin;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import com.example.app.ExampleAppController;
+
+public class AdminHomeController extends ExampleAppController {
+    @Override
+    protected void handleGet(HttpServletRequest request, HttpServletResponse response) throws Exception {
+        forwardTo("/WEB-INF/jsp/AdminHomePage.jsp", request, response);
+    }
+}</code></pre></div><div data-project="16" data-project-extends="15" class="u-mb-2"><ul data-project-commands><li data-command-open-folder-to-root>src/main/webapp/WEB-INF/jsp</li></ul><pre data-code="AdminHomePage.jsp" data-folder="src/main/webapp/WEB-INF/jsp" data-active><code class="language-html">&lt;%@page contentType="text/html" pageEncoding="UTF-8"%&gt;
+&lt;%@ include file="./includes/PageStart.jsp" %&gt;
+    &lt;h1&gt;Administration&lt;/h1&gt;
+    &lt;a href="${BASE_URL}/admin/add-product" class="button"&gt;Add product&lt;/a&gt;
+&lt;%@ include file="./includes/PageEnd.jsp" %&gt;</code></pre></div><p class="paragraph u-mb-2">In the admin router, we map the controller as shown in the following example.</p><div data-project="17" data-project-extends="16" class="u-mb-2"><pre data-code="AdminRouter.java" data-java-package="com.example.app.routes.admin" data-java-package-opened data-active data-code-highlight="7"><code class="language-java">package com.example.app.routes.admin;
+
+import io.github.jirkasa.servletrouter.HttpRouter;
+
+public class AdminRouter extends HttpRouter {
+    public AdminRouter() {
+        register("/", AdminHomeController.class);
+    }
+}</code></pre></div><p class="paragraph u-mb-2">We also need to map our admin router in our root router. The following example shows the modified code.</p><div data-project="18" data-project-extends="17" class="u-mb-2"><pre data-code="AppRouter.java" data-java-package="com.example.app.routes" data-java-package-opened data-active data-code-highlight="12"><code class="language-java">package com.example.app.routes;
+
+import com.example.app.routes.admin.AdminRouter;
+
+import io.github.jirkasa.servletrouter.BaseURLAttributeSetter;
+import io.github.jirkasa.servletrouter.HttpRouter;
+
+public class AppRouter extends HttpRouter {
+    public AppRouter() {
+        register(new BaseURLAttributeSetter());
+        register("/", HomeController.class);
+        register("/admin", new AdminRouter());
+    }
+}</code></pre></div><p class="paragraph u-mb-2">If you now visit <a href="http://localhost:8080/servlet-router-example-app/admin/" target="_blank" class="link">http://localhost:8080/servlet-router-example-app/admin/</a>, you should see the page depicted in the following image.</p><img src="../../static/img/screenshots/ExampleAppAdministrationHomePage.png" alt="Main page of administration" class="image image--full-width image--with-border u-mb-2"><p class="paragraph u-mb-2">In our application, we don't want just anyone to be able to visit the administration pages. Therefore, let's secure them now. We'll create middleware that will check if the user is logged in as an admin. If they are, it will allow them to proceed; otherwise, it will display the login page.</p><p class="paragraph u-mb-2">We'll create a new Java package for middleware named something like com.example.app.middlewares. Inside this package, we'll create a class named RequireAdminLogin. The following example shows its code. If the middleware detects that the user is logged in (has the attribute ADMIN_LOGGED_IN set in the session), it will allow the request to proceed. Otherwise, it will display the login page.</p><div data-project="19" data-project-extends="18" class="u-mb-2"><pre data-code="RequireAdminLogin.java" data-java-package="com.example.app.middlewares" data-java-package-opened data-active><code class="language-java">package com.example.app.middlewares;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+import io.github.jirkasa.servletrouter.HttpMiddleware;
+
+public class RequireAdminLogin extends HttpMiddleware {
+    @Override
+    public boolean handle(HttpServletRequest request, HttpServletResponse response) throws Exception {
+        HttpSession session = request.getSession();
+        
+        if (session.getAttribute("ADMIN_LOGGED_IN") != null) return true;
+        
+        request.getRequestDispatcher("/WEB-INF/jsp/AdminLoginPage.jsp").forward(request, response);
+        return false;
+    }
+}</code></pre></div><p class="paragraph u-mb-2">The JSP code for the login page is as follows. It contains a form where the user can input their credentials and submit them.</p><div data-project="20" data-project-extends="19" class="u-mb-2"><ul data-project-commands><li data-command-open-folder-to-root>src/main/webapp/WEB-INF/jsp</li></ul><pre data-code="AdminLoginPage.jsp" data-folder="src/main/webapp/WEB-INF/jsp" data-active><code class="language-html">&lt;%@page contentType="text/html" pageEncoding="UTF-8"%&gt;
+&lt;%@ include file="./includes/PageStart.jsp" %&gt;
+    &lt;h1&gt;Administration - login&lt;/h1&gt;
+    &lt;form action="${BASE_URL}/admin/login" method="POST"&gt;
+        &lt;input name="username" type="text" required&gt;
+        &lt;input name="password" type="password" required&gt;
+        &lt;button type="submit"&gt;Login&lt;/button&gt;
+    &lt;/form&gt;
+&lt;%@ include file="./includes/PageEnd.jsp" %&gt;</code></pre></div><p class="paragraph u-mb-2">In the root router, we need to register the middleware before the admin router, as shown in the following example.</p><div data-project="21" data-project-extends="20" class="u-mb-2"><pre data-code="AppRouter.java" data-java-package="com.example.app.routes" data-java-package-opened data-active data-code-highlight="13"><code class="language-java">package com.example.app.routes;
+
+import com.example.app.middlewares.RequireAdminLogin;
+import com.example.app.routes.admin.AdminRouter;
+
+import io.github.jirkasa.servletrouter.BaseURLAttributeSetter;
+import io.github.jirkasa.servletrouter.HttpRouter;
+
+public class AppRouter extends HttpRouter {
+    public AppRouter() {
+        register(new BaseURLAttributeSetter());
+        register("/", HomeController.class);
+        register("/admin", new RequireAdminLogin(), new AdminRouter());
+    }
+}</code></pre></div><p class="paragraph u-mb-2">Now, after refreshing the admin home page, you should see the login page instead of the main admin page.</p><img src="../../static/img/screenshots/ExampleAppAdministrationLoginpage.png" alt="Administration login page" class="image image--full-width image--with-border u-mb-2"><p class="paragraph u-mb-2">The login form on the login page is submitted via the POST method to /admin/login. Therefore, we will create a controller to handle this form. Let's name it, for example, AdminLoginController. Since we want to process the POST request, we will implement the handlePost method. In this method, we will check if the entered credentials are correct, and if so, we will log in the user (by setting a session attribute). Otherwise, we will simply redirect them back to the main admin page where the login form will be displayed again (we are not handling any validation messages, etc., in our example). The following code snippet shows the controller's code. The correct login credentials are directly specified in the code. In a real application, this would not be secure, but this is just a sample project.</p><div data-project="22" data-project-extends="21" class="u-mb-2"><pre data-code="AdminLoginController.java" data-java-package="com.example.app.routes.admin" data-java-package-opened data-active><code class="language-java">package com.example.app.routes.admin;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+import com.example.app.ExampleAppController;
+
+public class AdminLoginController extends ExampleAppController {
+    private String CORRECT_USERNAME = "admin";
+    private String CORRECT_PASSWORD = "password";
+    
+    @Override
+    protected void handlePost(HttpServletRequest request, HttpServletResponse response) throws Exception {
+        String username = request.getParameter("username");
+        String password = request.getParameter("password");
+        
+        if (
+            username != null
+            && password != null
+            && CORRECT_USERNAME.equals(username)
+            && CORRECT_PASSWORD.equals(password)
+        ) {
+            HttpSession session = request.getSession();
+            session.setAttribute("ADMIN_LOGGED_IN", true);
+        }
+        
+        response.sendRedirect(request.getAttribute("BASE_URL") + "/admin");
+    }
+}</code></pre></div><p class="paragraph u-mb-2">Since we want any user to access the administration login controller, we cannot register it in the admin router. This router is protected by our middleware, which checks if the user is logged in as an administrator. The request would not reach the controller. Therefore, we will register the login controller directly in our root router, as shown in the following example. Routers and middlewares are invoked even if only the beginning of the request path matches, so we must register the controller before registering the admin router. Otherwise, the request would not reach the controller.</p><div data-project="23" data-project-extends="22" class="u-mb-2"><pre data-code="AppRouter.java" data-java-package="com.example.app.routes" data-java-package-opened data-active data-code-highlight="14"><code class="language-java">package com.example.app.routes;
+
+import com.example.app.middlewares.RequireAdminLogin;
+import com.example.app.routes.admin.AdminLoginController;
+import com.example.app.routes.admin.AdminRouter;
+
+import io.github.jirkasa.servletrouter.BaseURLAttributeSetter;
+import io.github.jirkasa.servletrouter.HttpRouter;
+
+public class AppRouter extends HttpRouter {
+    public AppRouter() {
+        register(new BaseURLAttributeSetter());
+        register("/", HomeController.class);
+        register("/admin/login", AdminLoginController.class);
+        register("/admin", new RequireAdminLogin(), new AdminRouter());
+    }
+}</code></pre></div><p class="paragraph u-mb-2">If you now try to correctly fill in and submit the login form (the username is "admin" and the password is "password"), you should successfully log in and see the main administration page.</p><p class="paragraph u-mb-2">Now, we'll create a page through which the administrator can add a new product. We'll need a controller and a JSP page with a form. The code for them is shown in the following example. The controller currently only implements the handleGet method and passes the request for processing to the JSP page named "AdminAddProductPage.jsp".</p><div data-project="24" data-project-extends="23" class="u-mb-4"><pre data-code="AddProductController.java" data-java-package="com.example.app.routes.admin" data-java-package-opened data-active><code class="language-java">package com.example.app.routes.admin;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import com.example.app.ExampleAppController;
+
+public class AddProductController extends ExampleAppController {
+    @Override
+    protected void handleGet(HttpServletRequest request, HttpServletResponse response) throws Exception {
+        forwardTo("/WEB-INF/jsp/AdminAddProductPage.jsp", request, response);
+    }
+}</code></pre></div><div data-project="25" data-project-extends="24" class="u-mb-2"><ul data-project-commands><li data-command-open-folder-to-root>src/main/webapp/WEB-INF/jsp</li></ul><pre data-code="AdminAddProductPage.jsp" data-folder="src/main/webapp/WEB-INF/jsp" data-active><code class="language-html">&lt;%@page contentType="text/html" pageEncoding="UTF-8"%&gt;
+&lt;%@ include file="./includes/PageStart.jsp" %&gt;
+    &lt;h1&gt;Administration - add product&lt;/h1&gt;
+    &lt;form action="${BASE_URL}/admin/add-product" method="POST"&gt;
+        &lt;label&gt;Name:&lt;/label&gt;
+        &lt;input name="name" type="text" required&gt;&lt;br&gt;
+        &lt;label&gt;Price:&lt;/label&gt;
+        &lt;input name="price" type="number" required&gt;&lt;br&gt;
+        &lt;button type="submit"&gt;Add&lt;/button&gt;
+    &lt;/form&gt;
+&lt;%@ include file="./includes/PageEnd.jsp" %&gt;</code></pre></div><p class="paragraph u-mb-2">In the admin router, we'll register the newly created controller.</p><div data-project="26" data-project-extends="25" class="u-mb-2"><pre data-code="AdminRouter.java" data-java-package="com.example.app.routes.admin" data-java-package-opened data-active data-code-highlight="8"><code class="language-java">package com.example.app.routes.admin;
+
+import io.github.jirkasa.servletrouter.HttpRouter;
+
+public class AdminRouter extends HttpRouter {
+    public AdminRouter() {
+        register("/", AdminHomeController.class);
+        register("/add-product", AddProductController.class);
+    }
+}</code></pre></div><p class="paragraph u-mb-2">If you now click on "add product" on the main administration page, you'll see the page with the form as shown in the following image.</p><img src="../../static/img/screenshots/ExampleAppAdministrationAddProduct.png" alt="Page to add product" class="image image--full-width image--with-border u-mb-2"><p class="paragraph u-mb-2">The form on the page directs to the same controller that displays the page and is submitted using the POST method. In the controller, we'll implement the handlePost method to process the form and create a new product. This leads us to the point where we need to store the created products somehow. For our purposes, it will suffice to store them only in memory. The product in our application will be represented by the following class, which we can create in a new package, perhaps named "com.example.app.model".</p><div data-project="27" data-project-extends="26" class="u-mb-2"><pre data-code="Product.java" data-java-package="com.example.app.model" data-java-package-opened data-active><code class="language-java">package com.example.app.model;
+
+public class Product {
+    private int id;
+    private String name;
+    private double price;
+    
+    public int getId() {
+        return id;
+    }
+    public void setId(int id) {
+        this.id = id;
+    }
+    
+    public String getName() {
+        return name;
+    }
+    public void setName(String name) {
+        this.name = name;
+    }
+    
+    public double getPrice() {
+        return price;
+    }
+    public void setPrice(double price) {
+        this.price = price;
+    }
+}</code></pre></div><p class="paragraph u-mb-2">For adding and retrieving products, we'll use the following class, which you can also create in the "com.example.app.model" package. You don't need to worry about how it works. It contains three static methods. Using the addProduct method, we can add a new product, the getProducts method allows us to retrieve a list of all stored products, and the getProductById method enables us to retrieve a product by its ID.</p><div data-project="28" data-project-extends="27" class="u-mb-2"><pre data-code="ProductsDatabase.java" data-java-package="com.example.app.model" data-java-package-opened data-active><code class="language-java">package com.example.app.model;
+
+import java.util.LinkedList;
+import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
+
+public class ProductsDatabase {
+    private ProductsDatabase() {}
+    
+    private static int counter = 0;
+    
+    public static void addProduct(HttpServletRequest request, Product product) {
+        List&lt;Product&gt; products = (List&lt;Product&gt;) request.getServletContext().getAttribute("PRODUCTS");
+        if (products == null) {
+            products = new LinkedList&lt;Product&gt;();
+            request.getServletContext().setAttribute("PRODUCTS", products);
+        }
+        
+        product.setId(counter);
+        counter++;
+        
+        products.add(product);
+    }
+    
+    public static List&lt;Product&gt; getProducts(HttpServletRequest request) {
+        List&lt;Product&gt; products = (List&lt;Product&gt;) request.getServletContext().getAttribute("PRODUCTS");
+        if (products == null) products = new LinkedList&lt;Product&gt;();
+        return products;
+    }
+    
+    public static Product getProductById(HttpServletRequest request, int id) {
+        List&lt;Product&gt; products = (List&lt;Product&gt;) request.getServletContext().getAttribute("PRODUCTS");
+        if (products == null) products = new LinkedList&lt;Product&gt;();
+        
+        for (Product product : products) {
+            if (product.getId() == id) return product;
+        }
+        
+        return null;
+    }
+}</code></pre></div><p class="paragraph u-mb-2">Now, in the controller for adding a product, let's implement the handlePost method. We'll use the class we just created to store the product created based on the form values. The following code snippet shows the handlePost method. We're not performing any validation, so if the user leaves any value blank, it's fine. After saving the product, we'll simply redirect the user to the main administration page for simplicity.</p><div data-project="29" data-project-extends="28" class="u-mb-2"><pre data-code="AddProductController.java" data-java-package="com.example.app.routes.admin" data-java-package-opened data-active data-code-highlight="16-28"><code class="language-java">package com.example.app.routes.admin;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import com.example.app.ExampleAppController;
+import com.example.app.model.Product;
+import com.example.app.model.ProductsDatabase;
+
+public class AddProductController extends ExampleAppController {
+    @Override
+    protected void handleGet(HttpServletRequest request, HttpServletResponse response) throws Exception {
+        forwardTo("/WEB-INF/jsp/AdminAddProductPage.jsp", request, response);
+    }
+
+    @Override
+    protected void handlePost(HttpServletRequest request, HttpServletResponse response) throws Exception {
+        String name = (String) request.getParameter("name");
+        double price = Double.parseDouble((String) request.getParameter("price"));
+        
+        Product product = new Product();
+        product.setName(name);
+        product.setPrice(price);
+        
+        ProductsDatabase.addProduct(request, product);
+        
+        response.sendRedirect(request.getAttribute("BASE_URL") + "/admin");
+    }
+}</code></pre></div><p class="paragraph u-mb-2">You can try adding a product now, but you won't see it anywhere yet. After submitting the form, you should simply be redirected to the main administration page.</p><p class="paragraph u-mb-2">We're done with the administration. Now, all that's left is to create a page displaying a list of products and a page showing the details of a product. For these pages, we'll create a router, which we'll place in a new package called "com.example.app.routes.products".</p><div data-project="30" data-project-extends="29" class="u-mb-2"><pre data-code="ProductsRouter.java" data-java-package="com.example.app.routes.products" data-java-package-opened data-active><code class="language-java">package com.example.app.routes.products;
+
+import io.github.jirkasa.servletrouter.HttpRouter;
+
+public class ProductsRouter extends HttpRouter {
+    public ProductsRouter() {
+        
+    }
+}</code></pre></div><p class="paragraph u-mb-2">We'll start with the page displaying a list of products. The following examples show the controller and JSP page for it. In the controller, we'll retrieve the list of products, set them as an attribute in the request, and the JSP page will display them.</p><div data-project="31" data-project-extends="30" class="u-mb-4"><pre data-code="ProductsController.java" data-java-package="com.example.app.routes.products" data-java-package-opened data-active><code class="language-java">package com.example.app.routes.products;
+
+import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import com.example.app.ExampleAppController;
+import com.example.app.model.Product;
+import com.example.app.model.ProductsDatabase;
+
+public class ProductsController extends ExampleAppController {
+    @Override
+    protected void handleGet(HttpServletRequest request, HttpServletResponse response) throws Exception {
+        List&lt;Product&gt; products = ProductsDatabase.getProducts(request);
+        
+        request.setAttribute("products", products);
+        
+        forwardTo("/WEB-INF/jsp/ProductsListPage.jsp", request, response);
+    }
+}</code></pre></div><div data-project="32" data-project-extends="31" class="u-mb-2"><ul data-project-commands><li data-command-open-folder-to-root>src/main/webapp/WEB-INF/jsp</li></ul><pre data-code="ProductsListPage.jsp" data-folder="src/main/webapp/WEB-INF/jsp" data-active><code class="language-html">&lt;%@page contentType="text/html" pageEncoding="UTF-8"%&gt;
+&lt;%@ page import="com.example.app.model.Product" %&gt;
+&lt;%@ page import="java.util.List" %&gt;
+&lt;%@ include file="./includes/PageStart.jsp" %&gt;
+    &lt;h1&gt;Products&lt;/h1&gt;
+    &lt;table&gt;
+        &lt;thead&gt;
+            &lt;tr&gt;
+                &lt;th&gt;Name&lt;/th&gt;
+                &lt;th&gt;Price&lt;/th&gt;
+            &lt;/tr&gt;
+        &lt;/thead&gt;
+        &lt;tbody&gt;
+            &lt;% for (Product product : (List&lt;Product&gt;) request.getAttribute("products")) { %&gt;
+            &lt;tr&gt;
+                &lt;td&gt;&lt;a href="${BASE_URL}/products/&lt;%= product.getId() %&gt;"&gt;&lt;%= product.getName() %&gt;&lt;/a&gt;&lt;/td&gt;
+                &lt;td&gt;&lt;%= product.getPrice() %&gt;&lt;/td&gt;
+            &lt;/tr&gt;
+            &lt;% } %&gt;
+        &lt;/tbody&gt;
+    &lt;/table&gt;
+&lt;%@ include file="./includes/PageEnd.jsp" %&gt;</code></pre></div><p class="paragraph u-mb-2">In the router, we'll register the newly created controller as shown in the following example.</p><div data-project="33" data-project-extends="32" class="u-mb-2"><pre data-code="ProductsRouter.java" data-java-package="com.example.app.routes.products" data-java-package-opened data-active data-code-highlight="7"><code class="language-java">package com.example.app.routes.products;
+
+import io.github.jirkasa.servletrouter.HttpRouter;
+
+public class ProductsRouter extends HttpRouter {
+    public ProductsRouter() {
+        register("/", ProductsController.class);
+    }
+}</code></pre></div><p class="paragraph u-mb-2">We must also remember to register our router in the root router of our application.</p><div data-project="34" data-project-extends="33" class="u-mb-2"><pre data-code="AppRouter.java" data-java-package="com.example.app.routes" data-java-package-opened data-active data-code-highlight="15"><code class="language-java">package com.example.app.routes;
+
+import com.example.app.middlewares.RequireAdminLogin;
+import com.example.app.routes.admin.AdminLoginController;
+import com.example.app.routes.admin.AdminRouter;
+import com.example.app.routes.products.ProductsRouter;
+
+import io.github.jirkasa.servletrouter.BaseURLAttributeSetter;
+import io.github.jirkasa.servletrouter.HttpRouter;
+
+public class AppRouter extends HttpRouter {
+    public AppRouter() {
+        register(new BaseURLAttributeSetter());
+        register("/", HomeController.class);
+        register("/products", new ProductsRouter());
+        register("/admin/login", AdminLoginController.class);
+        register("/admin", new RequireAdminLogin(), new AdminRouter());
+    }
+}</code></pre></div><p class="paragraph u-mb-2">If you now click on the "list of products" button on the main page, you will see the page as shown in the following image. But first, of course, you will need to add some products in the administration section.</p><img src="../../static/img/screenshots/ExampleAppListOfProducts.png" alt="Page with list of products" class="image image--full-width image--with-border u-mb-2"><p class="paragraph u-mb-2">We have the option to click on each item in the table and thus access the detail page. Each item has a link pointing to /products/:id. So, we'll create a controller that will display the detail page. The following example shows it, and below you can also see the code of the JSP page.</p><div data-project="35" data-project-extends="34" class="u-mb-4"><pre data-code="ProductController.java" data-java-package="com.example.app.routes.products" data-java-package-opened data-active><code class="language-java">package com.example.app.routes.products;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import com.example.app.ExampleAppController;
+import com.example.app.model.Product;
+import com.example.app.model.ProductsDatabase;
+
+public class ProductController extends ExampleAppController {
+    @Override
+    protected void handleGet(HttpServletRequest request, HttpServletResponse response) throws Exception {
+        String idParam = getPathParam("id");
+        int id = Integer.parseInt(idParam);
+        
+        Product product = ProductsDatabase.getProductById(request, id);
+        request.setAttribute("product", product);
+        
+        forwardTo("/WEB-INF/jsp/ProductDetailPage.jsp", request, response);
+    }
+}</code></pre></div><div data-project="36" data-project-extends="35" class="u-mb-2"><ul data-project-commands><li data-command-open-folder-to-root>src/main/webapp/WEB-INF/jsp</li></ul><pre data-code="ProductDetailPage.jsp" data-folder="src/main/webapp/WEB-INF/jsp" data-active><code class="language-html">&lt;%@page contentType="text/html" pageEncoding="UTF-8"%&gt;
+&lt;%@ page import="com.example.app.model.Product" %&gt;
+&lt;%@ include file="./includes/PageStart.jsp" %&gt;
+    &lt;h1&gt;Product detail&lt;/h1&gt;
+    &lt;p&gt;Name: ${product.name}&lt;/p&gt;
+    &lt;p&gt;Price: ${product.price}&lt;/p&gt;
+    &lt;p&gt;&lt;a href="${BASE_URL}/products"&gt;back to list&lt;/a&gt;&lt;/p&gt;
+&lt;%@ include file="./includes/PageEnd.jsp" %&gt;</code></pre></div><p class="paragraph u-mb-2">We'll register the created controller in the router.</p><div data-project="37" data-project-extends="36" class="u-mb-2"><pre data-code="ProductsRouter.java" data-java-package="com.example.app.routes.products" data-java-package-opened data-active data-code-highlight="8"><code class="language-java">package com.example.app.routes.products;
+
+import io.github.jirkasa.servletrouter.HttpRouter;
+
+public class ProductsRouter extends HttpRouter {
+    public ProductsRouter() {
+        register("/", ProductsController.class);
+        register("/:id", ProductController.class);
+    }
+}</code></pre></div><p class="paragraph u-mb-2">If you click on any product now, the product detail page will open up.</p><img src="../../static/img/screenshots/ExampleAppProductDetail.png" alt="Page with detail of product" class="image image--full-width image--with-border u-mb-2"><p class="paragraph u-mb-2">Our application is essentially finished. However, we could still create an error controller to display an error page if an error occurs in any of our controllers. Additionally, we could add a 404 page in case no controller is found for a URL.</p><p class="paragraph u-mb-2">We'll start with the 404 page. In the "com.example.app.routes" package, let's create a controller named, for example, PageNotFoundController. This controller will be a bit different from the others because we want it to handle requests regardless of the method used. We'll override the handle method in it, where we'll set the HTTP status code to 404 (Page Not Found) and render a JSP page indicating that the page was not found. The following examples show the code for the controller and the JSP page it displays.</p><div data-project="38" data-project-extends="37" class="u-mb-4"><pre data-code="PageNotFoundController.java" data-java-package="com.example.app.routes" data-java-package-opened data-active><code class="language-java">package com.example.app.routes;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import com.example.app.ExampleAppController;
+
+public class PageNotFoundController extends ExampleAppController {
+    @Override
+    public boolean handle(HttpServletRequest request, HttpServletResponse response) throws Exception {
+        response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+        forwardTo("/WEB-INF/jsp/PageNotFoundPage.jsp", request, response);
+        return false;
+    }
+}</code></pre></div><div data-project="39" data-project-extends="38" class="u-mb-2"><ul data-project-commands><li data-command-open-folder-to-root>src/main/webapp/WEB-INF/jsp</li></ul><pre data-code="PageNotFoundPage.jsp" data-folder="src/main/webapp/WEB-INF/jsp" data-active><code class="language-html">&lt;%@page contentType="text/html" pageEncoding="UTF-8"%&gt;
+&lt;%@ include file="./includes/PageStart.jsp" %&gt;
+    &lt;h1&gt;Page not found&lt;/h1&gt;
+    &lt;p&gt;The page unfortunately does not exist. Continue to &lt;a href="${BASE_URL}"&gt;home page&lt;/a&gt;.&lt;/p&gt;
+&lt;%@ include file="./includes/PageEnd.jsp" %&gt;</code></pre></div><p class="paragraph u-mb-2">We'll register the controller as the last one in our root router for all requests. So, if no other controller is found to handle the request during routing, this one will be used.</p><div data-project="40" data-project-extends="39" class="u-mb-2"><pre data-code="AppRouter.java" data-java-package="com.example.app.routes" data-java-package-opened data-active data-code-highlight="18"><code class="language-java">package com.example.app.routes;
+
+import com.example.app.middlewares.RequireAdminLogin;
+import com.example.app.routes.admin.AdminLoginController;
+import com.example.app.routes.admin.AdminRouter;
+import com.example.app.routes.products.ProductsRouter;
+
+import io.github.jirkasa.servletrouter.BaseURLAttributeSetter;
+import io.github.jirkasa.servletrouter.HttpRouter;
+
+public class AppRouter extends HttpRouter {
+    public AppRouter() {
+        register(new BaseURLAttributeSetter());
+        register("/", HomeController.class);
+        register("/products", new ProductsRouter());
+        register("/admin/login", AdminLoginController.class);
+        register("/admin", new RequireAdminLogin(), new AdminRouter());
+        register(PageNotFoundController.class);
+    }
+}</code></pre></div><p class="paragraph u-mb-2">If you now visit a URL that is not mapped to any controller, you should see the page displayed in the following image.</p><img src="../../static/img/screenshots/ExampleAppPageNotFound.png" alt="Page not found" class="image image--full-width image--with-border u-mb-2"><p class="paragraph u-mb-2">We will now create an error controller, which will display an error page when an error occurs, and with that, we will consider our application complete. We will create it in the package "com.example.app.routes" and name it something like "ServerErrorController". In the handle method, we will simply print the error message to the console, set the HTTP status code to 500, and render a page announcing that an error has occurred. The code for the controller and the JSP page is shown in the following examples.</p><div data-project="41" data-project-extends="40" class="u-mb-4"><pre data-code="ServerErrorController.java" data-java-package="com.example.app.routes" data-java-package-opened data-active><code class="language-java">package com.example.app.routes;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import io.github.jirkasa.servletrouter.HttpErrorController;
+
+public class ServerErrorController extends HttpErrorController {
+    public ServerErrorController(Exception exception) {
+        super(exception);
+    }
+
+    @Override
+    public boolean handle(HttpServletRequest request, HttpServletResponse response) throws Exception {
+        System.out.println(getException().getMessage());
+        
+        response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        
+        forwardTo("/WEB-INF/jsp/ErrorPage.jsp", request, response);
+        return false;
+    }
+    
+}</code></pre></div><div data-project="42" data-project-extends="41" class="u-mb-2"><ul data-project-commands><li data-command-open-folder-to-root>src/main/webapp/WEB-INF/jsp</li></ul><pre data-code="ErrorPage.jsp" data-folder="src/main/webapp/WEB-INF/jsp" data-active><code class="language-html">&lt;%@page contentType="text/html" pageEncoding="UTF-8"%&gt;
+&lt;%@ include file="./includes/PageStart.jsp" %&gt;
+    &lt;h1&gt;An error occurred&lt;/h1&gt;
+    &lt;p&gt;Unfortunately, an error occurred.&lt;/p&gt;
+&lt;%@ include file="./includes/PageEnd.jsp" %&gt;</code></pre></div><p class="paragraph u-mb-2">Finally, we will register our error controller in the root router of our application using the registerErrorController method, as shown in the following example.</p><div data-project="43" data-project-extends="42" class="u-mb-2"><pre data-code="AppRouter.java" data-java-package="com.example.app.routes" data-java-package-opened data-active data-code-highlight="19"><code class="language-java">package com.example.app.routes;
+
+import com.example.app.middlewares.RequireAdminLogin;
+import com.example.app.routes.admin.AdminLoginController;
+import com.example.app.routes.admin.AdminRouter;
+import com.example.app.routes.products.ProductsRouter;
+
+import io.github.jirkasa.servletrouter.BaseURLAttributeSetter;
+import io.github.jirkasa.servletrouter.HttpRouter;
+
+public class AppRouter extends HttpRouter {
+    public AppRouter() {
+        register(new BaseURLAttributeSetter());
+        register("/", HomeController.class);
+        register("/products", new ProductsRouter());
+        register("/admin/login", AdminLoginController.class);
+        register("/admin", new RequireAdminLogin(), new AdminRouter());
+        register(PageNotFoundController.class);
+        registerErrorController(ServerErrorController.class);
+    }
+}</code></pre></div><p class="paragraph u-mb-2">If an error ever occurs in our application, the registered error controller should be called, printing the error to the console and displaying the error page. If you want to try it out, you can throw an exception in any controller.</p><p class="paragraph u-mb-2">Our sample application is complete. If you want to review its code, you can open the left panel in the following demonstration and view individual project files.</p><div data-project="44" data-project-extends="43"></div></main></div></div><footer class="footer"><div class="footer__content"><p class="footer__text">Created by <a href="https://jirkasa.github.io/" target="_blank" class="footer__link">Jiří Satora</a></p></div></footer></body></html>
