@@ -189,7 +189,7 @@
                 <%- include("./includes/deployment-descriptor-code-box.ejs") %>
                 <h2 id="example-of-creating-a-project" class="heading-secondary u-mb-2">Example of creating a project</h2>
                 <p class="paragraph u-mb-2">You might want to see how to use the Servlet Router library in a project. Let's dive into creating a sample application. It will be a simple website with a main page, a page displaying a list of products, and a product detail page. The administrator will have the ability to add products and will be able to log in. The following diagram shows what the structure of the website will look like.</p>
-                <img src="../../static/img/illustrations/ServletRouterExampleAppStructure.svg" alt="Structure of web application" class="image image--full-width u-mb-4">
+                <img src="./static/img/illustrations/ServletRouterExampleAppStructure.svg" alt="Structure of web application" class="image image--full-width u-mb-4">
                 <p class="paragraph u-mb-2">We'll start by creating a new Maven project, which we can name "servlet-router-example-app." In the pom.xml file, we'll add the Servlet Router library to the project as a dependency, along with servlets, as shown in the following example.</p>
                 <%- include("./includes/example-project-code-box-1.ejs") %>
                 <p class="paragraph u-mb-2">The first thing we can do is to create the root router of our application. We can name it something like "AppRouter." For now, it will be empty, but at the beginning, we'll register the <a href="./javadoc/io/github/jirkasa/servletrouter/BaseURLAttributeSetter.html" target="_blank" class="link">BaseURLAttributeSetter</a> for setting the attribute containing the root URL of our application. We can create a Java package for it, perhaps named com.example.app.routes, and create it there.</p>
@@ -212,7 +212,7 @@
                 <p class="paragraph u-mb-2">The last thing we need to do for the homepage is register the controller in the router, as shown in the following example.</p>
                 <%- include("./includes/example-project-code-box-10.ejs") %>
                 <p class="paragraph u-mb-2">Now you can run the application, and after visiting <a href="http://localhost:8080/servlet-router-example-app/" target="_blank" class="link">http://localhost:8080/servlet-router-example-app/</a>, you should see the page as shown in the following image.</p>
-                <img src="../../static/img/screenshots/ExampleAppHomePage.png" alt="Main page of application" class="image image--full-width image--with-border u-mb-2">
+                <img src="./static/img/screenshots/ExampleAppHomePage.png" alt="Main page of application" class="image image--full-width image--with-border u-mb-2">
                 <p class="paragraph u-mb-2">Now let's style the page using CSS styles. This leads us to creating a folder in the webapp directory where we'll put things like images, JavaScript files, CSS styles, and so on. We need to map this folder to the default servlet; otherwise, all requests for these files would go to our servlet named "AppServlet". Let's create this folder and name it something like "static". Then we can create a file for CSS styles in it. The code for it is shown in the following example, so you can copy it.</p>
                 <%- include("./includes/example-project-code-box-11.ejs") %>
                 <p class="paragraph u-mb-2">In the PageStart.jsp file, which contains the code for the start of the page, we'll include the CSS style file. We'll use the BASE_URL attribute to make it work for any page where the PageStart.jsp file is included.</p>
@@ -220,7 +220,7 @@
                 <p class="paragraph u-mb-2">In the web.xml file, we'll map our newly created static folder to the default servlet, as shown in the following example.</p>
                 <%- include("./includes/example-project-code-box-13.ejs") %>
                 <p class="paragraph u-mb-2">After restarting the server and refreshing the page, you should see that the page has been styled.</p>
-                <img src="../../static/img/screenshots/ExampleAppHomePage.png" alt="Main page of application" class="image image--full-width image--with-border u-mb-2">
+                <img src="./static/img/screenshots/ExampleAppHomePage.png" alt="Main page of application" class="image image--full-width image--with-border u-mb-2">
                 <p class="paragraph u-mb-2">We have the main page of our application. Now let's create pages for the admin. These will be handled by a separate router. Let's create it and place it in a new package, perhaps named com.example.app.routes.admin. It's up to you how you want to organize your classes into packages. In this sample application, I've decided to create separate packages for each router and its controllers.</p>
                 <%- include("./includes/example-project-code-box-14.ejs") %>
                 <p class="paragraph u-mb-2">As the first step, let's create the home page for the admin. It will contain only a heading "Administration" and a link to the page for adding a new product. We'll need a controller and a JSP page for this. The following examples show them. The file name for the page is "AdminHomePage.jsp".</p>
@@ -231,7 +231,7 @@
                 <p class="paragraph u-mb-2">We also need to map our admin router in our root router. The following example shows the modified code.</p>
                 <%- include("./includes/example-project-code-box-18.ejs") %>
                 <p class="paragraph u-mb-2">If you now visit <a href="http://localhost:8080/servlet-router-example-app/admin/" target="_blank" class="link">http://localhost:8080/servlet-router-example-app/admin/</a>, you should see the page depicted in the following image.</p>
-                <img src="../../static/img/screenshots/ExampleAppAdministrationHomePage.png" alt="Main page of administration" class="image image--full-width image--with-border u-mb-2">
+                <img src="./static/img/screenshots/ExampleAppAdministrationHomePage.png" alt="Main page of administration" class="image image--full-width image--with-border u-mb-2">
                 <p class="paragraph u-mb-2">In our application, we don't want just anyone to be able to visit the administration pages. Therefore, let's secure them now. We'll create middleware that will check if the user is logged in as an admin. If they are, it will allow them to proceed; otherwise, it will display the login page.</p>
                 <p class="paragraph u-mb-2">We'll create a new Java package for middleware named something like com.example.app.middlewares. Inside this package, we'll create a class named RequireAdminLogin. The following example shows its code. If the middleware detects that the user is logged in (has the attribute ADMIN_LOGGED_IN set in the session), it will allow the request to proceed. Otherwise, it will display the login page.</p>
                 <%- include("./includes/example-project-code-box-19.ejs") %>
@@ -240,7 +240,7 @@
                 <p class="paragraph u-mb-2">In the root router, we need to register the middleware before the admin router, as shown in the following example.</p>
                 <%- include("./includes/example-project-code-box-21.ejs") %>
                 <p class="paragraph u-mb-2">Now, after refreshing the admin home page, you should see the login page instead of the main admin page.</p>
-                <img src="../../static/img/screenshots/ExampleAppAdministrationLoginpage.png" alt="Administration login page" class="image image--full-width image--with-border u-mb-2">
+                <img src="./static/img/screenshots/ExampleAppAdministrationLoginpage.png" alt="Administration login page" class="image image--full-width image--with-border u-mb-2">
                 <p class="paragraph u-mb-2">The login form on the login page is submitted via the POST method to /admin/login. Therefore, we will create a controller to handle this form. Let's name it, for example, AdminLoginController. Since we want to process the POST request, we will implement the handlePost method. In this method, we will check if the entered credentials are correct, and if so, we will log in the user (by setting a session attribute). Otherwise, we will simply redirect them back to the main admin page where the login form will be displayed again (we are not handling any validation messages, etc., in our example). The following code snippet shows the controller's code. The correct login credentials are directly specified in the code. In a real application, this would not be secure, but this is just a sample project.</p>
                 <%- include("./includes/example-project-code-box-22.ejs") %>
                 <p class="paragraph u-mb-2">Since we want any user to access the administration login controller, we cannot register it in the admin router. This router is protected by our middleware, which checks if the user is logged in as an administrator. The request would not reach the controller. Therefore, we will register the login controller directly in our root router, as shown in the following example. Routers and middlewares are invoked even if only the beginning of the request path matches, so we must register the controller before registering the admin router. Otherwise, the request would not reach the controller.</p>
@@ -252,7 +252,7 @@
                 <p class="paragraph u-mb-2">In the admin router, we'll register the newly created controller.</p>
                 <%- include("./includes/example-project-code-box-26.ejs") %>
                 <p class="paragraph u-mb-2">If you now click on "add product" on the main administration page, you'll see the page with the form as shown in the following image.</p>
-                <img src="../../static/img/screenshots/ExampleAppAdministrationAddProduct.png" alt="Page to add product" class="image image--full-width image--with-border u-mb-2">
+                <img src="./static/img/screenshots/ExampleAppAdministrationAddProduct.png" alt="Page to add product" class="image image--full-width image--with-border u-mb-2">
                 <p class="paragraph u-mb-2">The form on the page directs to the same controller that displays the page and is submitted using the POST method. In the controller, we'll implement the handlePost method to process the form and create a new product. This leads us to the point where we need to store the created products somehow. For our purposes, it will suffice to store them only in memory. The product in our application will be represented by the following class, which we can create in a new package, perhaps named "com.example.app.model".</p>
                 <%- include("./includes/example-project-code-box-27.ejs") %>
                 <p class="paragraph u-mb-2">For adding and retrieving products, we'll use the following class, which you can also create in the "com.example.app.model" package. You don't need to worry about how it works. It contains three static methods. Using the addProduct method, we can add a new product, the getProducts method allows us to retrieve a list of all stored products, and the getProductById method enables us to retrieve a product by its ID.</p>
@@ -270,14 +270,14 @@
                 <p class="paragraph u-mb-2">We must also remember to register our router in the root router of our application.</p>
                 <%- include("./includes/example-project-code-box-34.ejs") %>
                 <p class="paragraph u-mb-2">If you now click on the "list of products" button on the main page, you will see the page as shown in the following image. But first, of course, you will need to add some products in the administration section.</p>
-                <img src="../../static/img/screenshots/ExampleAppListOfProducts.png" alt="Page with list of products" class="image image--full-width image--with-border u-mb-2">
+                <img src="./static/img/screenshots/ExampleAppListOfProducts.png" alt="Page with list of products" class="image image--full-width image--with-border u-mb-2">
                 <p class="paragraph u-mb-2">We have the option to click on each item in the table and thus access the detail page. Each item has a link pointing to /products/:id. So, we'll create a controller that will display the detail page. The following example shows it, and below you can also see the code of the JSP page.</p>
                 <%- include("./includes/example-project-code-box-35.ejs") %>
                 <%- include("./includes/example-project-code-box-36.ejs") %>
                 <p class="paragraph u-mb-2">We'll register the created controller in the router.</p>
                 <%- include("./includes/example-project-code-box-37.ejs") %>
                 <p class="paragraph u-mb-2">If you click on any product now, the product detail page will open up.</p>
-                <img src="../../static/img/screenshots/ExampleAppProductDetail.png" alt="Page with detail of product" class="image image--full-width image--with-border u-mb-2">
+                <img src="./static/img/screenshots/ExampleAppProductDetail.png" alt="Page with detail of product" class="image image--full-width image--with-border u-mb-2">
                 <p class="paragraph u-mb-2">Our application is essentially finished. However, we could still create an error controller to display an error page if an error occurs in any of our controllers. Additionally, we could add a 404 page in case no controller is found for a URL.</p>
                 <p class="paragraph u-mb-2">We'll start with the 404 page. In the "com.example.app.routes" package, let's create a controller named, for example, PageNotFoundController. This controller will be a bit different from the others because we want it to handle requests regardless of the method used. We'll override the handle method in it, where we'll set the HTTP status code to 404 (Page Not Found) and render a JSP page indicating that the page was not found. The following examples show the code for the controller and the JSP page it displays.</p>
                 <%- include("./includes/example-project-code-box-38.ejs") %>
@@ -285,7 +285,7 @@
                 <p class="paragraph u-mb-2">We'll register the controller as the last one in our root router for all requests. So, if no other controller is found to handle the request during routing, this one will be used.</p>
                 <%- include("./includes/example-project-code-box-40.ejs") %>
                 <p class="paragraph u-mb-2">If you now visit a URL that is not mapped to any controller, you should see the page displayed in the following image.</p>
-                <img src="../../static/img/screenshots/ExampleAppPageNotFound.png" alt="Page not found" class="image image--full-width image--with-border u-mb-2">
+                <img src="./static/img/screenshots/ExampleAppPageNotFound.png" alt="Page not found" class="image image--full-width image--with-border u-mb-2">
                 <p class="paragraph u-mb-2">We will now create an error controller, which will display an error page when an error occurs, and with that, we will consider our application complete. We will create it in the package "com.example.app.routes" and name it something like "ServerErrorController". In the handle method, we will simply print the error message to the console, set the HTTP status code to 500, and render a page announcing that an error has occurred. The code for the controller and the JSP page is shown in the following examples.</p>
                 <%- include("./includes/example-project-code-box-41.ejs") %>
                 <%- include("./includes/example-project-code-box-42.ejs") %>
